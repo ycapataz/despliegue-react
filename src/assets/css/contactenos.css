@@ -1,0 +1,116 @@
+* {
+    margin: 0;
+    padding: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+.max_conten{
+    background-image: linear-gradient(rgba(0,0,0,0.422),rgba(0,0,0,0.445)),
+    url(../images/perro.jpg);
+    -webkit-background-size: cover;
+    background-size: cover;
+    background-attachment: fixed;
+}
+.contenedor .form .form-header .form-title {
+    font-weight: normal;
+    font-family: Arial, Helvetica;
+    color: #C4FD96;
+    text-align: center;
+    padding: 30px 0;
+}
+.contenedor .form {
+    background: rgba(0, 0, 0,.6);
+    width: 90%;
+    max-width: 650px;
+    margin: auto;
+    padding: 20px 35px;
+    margin-top: 2%;
+    padding-bottom: 30px;
+    border-radius: 50px;
+    border: 5px solid #C4FD96;
+}
+.contenedor .form .form-label {
+    display: block;
+    color: #C4FD96;
+    font-size: 19px;
+    font-family: Arial, Helvetica;
+    position: relative;
+    padding: 12px;
+}
+.contenedor .form .form-input, .form-textarea {
+    background: rgba(0, 0, 0,.7);
+    border: none;
+    outline: none;
+    border-bottom: 2px solid #C4FD96;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;border-radius: 2px;
+    font-size: 14px;
+    color: white;
+    font-family: Arial, Helvetica;
+}
+.contenedor .form .lista {
+    background: #C4FD96;
+    padding: 5px 10px;
+    margin-bottom: 20px;border-radius: 10px;
+    font-size: 15px;
+    text-align: center;
+}
+.contenedor .form .form-textarea {
+    resize: vertical;
+    max-height: 150px;
+    min-height: 50px;
+}
+.contenedor .form .btn-submit {
+    width: 100%;
+    font-family: Arial, Helvetica;
+    outline: none;
+    background: #C4FD96;
+    font-size: 16px;
+    background-origin: none;
+    color: black;
+    padding: 15px 0;
+    cursor: pointer;
+    transition: all .5s ease;
+}
+.contenedor .form .btn-submit:hover {
+    background: #d5fbb6;
+}
+.form p {
+    position: relative;
+    bottom: 40px;
+    padding: 30px;
+    height: 40px;
+    text-align: center;
+    font-size: 15px;
+    color: #C4FD96;
+}
+
+/* Estilo de los mensajes de error */
+.formulario_input-error {
+    display: none;
+    font-size: 14px;
+    margin-top: 5px; /* Espacio entre el campo y el mensaje de error */
+}
+
+/* Mostrar mensaje de error cuando el campo es inválido */
+.campo input:invalid + .formulario_input-error {
+    display: block;
+}
+
+.nombre_error{
+    display: none;
+}
+.apellido_error{
+    display: none;
+}
+.cedula_error{
+    display: none;
+}
+.telefono_error{
+    display: none;
+}
+.contraseña2_error{
+    display: none;
+}

@@ -1,0 +1,75 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: arial, helvetica; /*tipo de letra*/
+}
+/*se accede a la clase containerr que tendra las 3 tarjetas (nosotros, mision, vision)*/
+.containerr{
+    width: 100%; /*ancho*/
+    display: flex; /*display flexible*/
+    max-width: 1500px; /*se le da un maximo de ancho en pixeles*/
+    margin: auto; /*centra horizontalmente con respecto al contenedor*/
+}
+.cardd{
+    /*se accede a la clase cardd que seran cada una de las 3 tarjetas*/
+    width: 100%; /*ancho*/
+    margin: 20px; /*margen*/
+    border-radius: 6px; /*pequeño redondeado en cada esquina de las tarjetas*/
+    overflow: hidden; /*todo elemento fuera de la tarjeta se oculte*/
+    background: #fff; /*fondo de las tarjetas*/
+    box-shadow: 0px 1px 10px rgba(0, 0, 0, .2); /*sombra a las tarjetas*/
+    cursor: default; /*cursor normal*/
+    transition: all 400ms ease; /*efecto*/
+}
+/*efecto cuando se pasa el cursor por encima*/
+.cardd:hover {
+    /*hover es para darle diseño cuando se apunta con el mouse y es una seudoclase*/
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, .4); /*sombra a las tarjetas*/
+    transform: translate(-3%); /*efecto*/
+}
+.cardd img{
+    /*se accede a las imagenes de la clase cardd que seran cada una de las 3 tarjetas*/
+    width: 100%;
+    height: 350px;
+}
+.cardd .contenidoo {
+    /*se accede a la clase cardd que seran cada una de las 3 tarjetas*/
+    /*se accede a la clase contenidoo que que contiene toda la informacion de las 3 tarjetas*/
+    padding: 15px;
+    text-align: center; /*todo el texto e informacion dentro de la clase este centrado*/
+}
+.cardd .contenidoo p{
+    /*se accede al parrafo de la informacion*/
+    line-height: 1.5; /*para que cada linea de parrafo tenga un espacio mas grande*/
+    font-size: 16px; /*tamaño de las letras*/
+}
+.cardd .contenidoo h3{
+    /*se accede ala titulo de cada una de las 3 tarjetas*/
+    margin-bottom: 15px; /*que haya un espacio mas granded entre el titulo y el texto*/
+}
+.cardd .contenidoo a{
+    /*se accede al boton "leer mas" de las 3 tarjetas*/
+    text-decoration: none; /*para eliminar el subrayado*/
+    display: inline-block;
+    padding: 10px;
+    margin-top: 10px; /*para que se separe del texto*/
+    border: 2px solid #56208C;
+    border-radius: 4px; /*pequeño redondeado en cada esquina de los botones*/
+    transition: all 400ms ease; /*efecto*/
+}
+.cardd .contenidoo a:hover{
+    /*hover es para darle diseño cuando se apunta con el mouse y es una seudoclase*/
+    background: #56208C;
+    color: #fff;
+}
+@media only screen and (min-width:320px) and (max-width:768px){
+	.containerr{
+		flex-wrap: wrap;
+	}
+	.cardd{
+		margin: 15px;
+	}
+}
+
+

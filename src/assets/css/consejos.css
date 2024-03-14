@@ -1,0 +1,35 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica;
+}
+.wrapper img{
+    max-width: 350px;
+    margin: 20px auto;
+    float: left;
+    border: 3px solid;
+    border-radius: 20px;
+    margin-right: 50px;
+    transition: all 400ms ease-out;
+	cursor: default; /*Para que el texto de la tarjeta no reconozca el cursor*/
+
+}
+.wrapper img:hover{
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.4);/*sombra mas fuerte que la anterior*/
+	transform: translateY(-3%);/*desplazamiento en Y*/
+}
+.wrapper{
+    margin: 70px auto;
+    width: 70%;
+}
+.text-box h2{
+    margin: 20px auto;
+    font-size: 42px;
+}
+.text-box p{
+    margin: 20px auto;
+    font-size: 18px;
+    justify-content: center;
+}
+

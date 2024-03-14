@@ -1,0 +1,73 @@
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+/*Cards*/
+.container-card{
+	width: 100%;
+	margin: 100px auto;
+	display: flex;
+	max-width: 1500px;
+	margin: auto; /*Centra horizontalmente con respecto al contenedor*/
+}
+
+
+.card{
+	width: 100%;
+	margin: 20px;
+	border-radius: 6px; /*Redondear puntas de las tarjetas*/
+	overflow: hidden; /*Todo elemento afuera del contenedor card se oculte*/
+	background:#fff;
+	box-shadow: 0px 1px 10px rgba(0,0,0,0.2);
+	transition: all 400ms ease-out;
+	cursor: default; /*Para que el texto de la tarjeta no reconozca el cursor*/
+}
+.card:hover{
+	box-shadow: 5px 5px 20px rgba(0,0,0,0.4);/*sombra mas fuerte que la anterior*/
+	transform: translateY(-3%);/*desplazamiento en Y*/
+}
+.card img{  /*ajuste de tamaño imagenes*/
+	width: 100%;
+	height: 210px;
+}
+.card .contenido-card{
+	padding: 10px;
+	text-align: center; /*centra texto que esta debajo de la imagen*/
+}
+.card .contenido-card h3{/*titulo tarjeta*/
+	margin-bottom: 5px;
+	color: #56208c;
+}
+.card .contenido-card p{/*parrafo*/
+	line-height: 1.3;/*linea de parrafo*/
+	color: #56208c;
+	font-size: 14px;
+	margin-bottom: 5px;
+}
+.card .contenido-card a{/*boton*/
+	display: inline-block;
+    background-color:  #815DA6;
+	padding: 10px;
+	margin-top: 10px;
+	text-decoration: none;/*desaparece linea LINK*/
+	color: #8DD048;
+	border: 2px solid #8DD048;
+	border-radius: 4px;
+	transition: all 400ms ease;
+	margin-bottom: 5px;
+}
+.card .contenido-card a:hover{
+	background: #C3F294;
+	color: #fff;
+}
+@media only screen and (min-width:320px) and (max-width:768px){
+	.container-card{
+		flex-wrap: wrap;
+	}
+	.card{
+		margin: 15px;
+	}
+}

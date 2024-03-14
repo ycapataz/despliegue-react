@@ -1,0 +1,134 @@
+/* Estilos del contenedor principal del carrusel */
+.carrusel {
+    position: relative; /* Posición relativa para alinear elementos internos */
+    z-index: 1;
+    border-radius: 12px;
+    box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.5); /* Sombra del carrusel */
+    margin-top: 25px; /* Margen superior de 25 píxeles */
+    max-width: 90%; /* Ancho máximo del 100% del contenedor */
+    height: auto; /* Altura ajustada automáticamente según el contenido */
+}
+  
+/* Estilos de las imágenes dentro del carrusel */
+.img {
+    width: 100%; /* Ancho del 100% del contenedor padre */
+    
+}
+  
+/* Estilos del contenedor interno del carrusel */
+.control_interno {
+    position: relative; /* Posición relativa para alinear elementos internos */
+    overflow: hidden; /* Oculta el contenido que excede el tamaño del contenedor */
+    height: auto; /* Altura ajustada automáticamente según el contenido */
+    max-height: 100%; /* Altura máxima del 100% del contenedor padre */
+}
+  
+/* Estilos de las diapositivas del carrusel */
+.deslizar:checked + .diapositiva {
+    position: static; /* Establece la posición estática para mostrar la diapositiva */
+    opacity: 100; /* Opacidad del 100% para mostrar la diapositiva */
+}
+  
+/* Estilos de las diapositivas individuales */
+.diapositiva {
+    position: absolute; /* Posición absoluta para superponer las diapositivas */
+    opacity: 0; /* Opacidad del 0 para ocultar las diapositivas */
+    -webkit-transition: opacity 0.6s ease-out; /* Transición suave de la opacidad en 0.6 segundos (para navegadores webkit) */
+    transition: opacity 0.6s ease-out; /* Transición suave de la opacidad en 0.6 segundos */
+    width: 100%; /* Ancho del 100% del contenedor padre */
+}
+  
+/* Estilos de las imágenes dentro de las diapositivas */
+.diapositiva img {
+    display: block; /* Muestra la imagen como bloque */
+    height: auto; /* Altura ajustada automáticamente según el contenido */
+    width: 100%; /* Ancho del 100% del contenedor padre */
+    border-radius: 12px;
+}
+  
+/* Estilos de los controles deslizantes (flechas) */
+.deslizar-control {
+    background: rgba(150, 34, 173, 0.205); /* Color de fondo semi-transparente */
+    border-radius: 50%; /* Borde redondeado */
+    color: #ffffff27; /* Color del texto con transparencia */
+    cursor: pointer; /* Cursor de tipo puntero al pasar por encima */
+    display: none; /* Oculta los controles inicialmente */
+    font-size: 40px; /* Tamaño de fuente de 40 píxeles */
+    height: 40px; /* Altura de 40 píxeles */
+    line-height: 35px; /* Altura de línea de 35 píxeles */
+    position: absolute; /* Posición absoluta para alinear los controles */
+    top: 50%; /* Posiciona los controles en el centro verticalmente */  
+    -webkit-transform: translate(0, -50%); /* Transformación para ajustar verticalmente los controles */
+    -ms-transform: translate(0, -50%); /* Transformación para ajustar verticalmente los controles */
+    transform: translate(0, -50%); /* Transformación para ajustar verticalmente los controles */
+    text-align: center; /* Centra el contenido horizontalmente */
+    width: 40px; /* Ancho de 40 píxeles */
+    z-index: 10; /* Capa de z-index para posicionar los controles por encima del contenido */
+}
+  
+/* Estilos del control deslizante previo (flecha izquierda) */
+.deslizar-control.prev {
+    left: 2%; /* Posiciona el control a 2% desde el borde izquierdo */
+}
+  
+/* Estilos del control deslizante siguiente (flecha derecha) */
+.deslizar-control.next {
+    right: 2%; /* Posiciona el control a 2% desde el borde derecho */
+}
+  
+/* Estilos de los controles deslizantes al pasar el cursor por encima */
+.deslizar-control:hover {
+    background: rgba(167, 20, 187, 0.925); /* Color de fondo semi-transparente más oscuro */
+    color: #aaaaaa; /* Color del texto en gris claro */
+}
+
+/* Estilos para mostrar los controles deslizantes activos */
+#deslizar-1:checked ~ .control-1, /* Muestra el control-1 cuando deslizar-1 está seleccionado */
+#deslizar-2:checked ~ .control-2, /* Muestra el control-2 cuando deslizar-2 está seleccionado */
+#deslizar-3:checked ~ .control-3, /* Muestra el control-3 cuando deslizar-3 está seleccionado */
+#deslizar-4:checked ~ .control-4 { /* Muestra el control-4 cuando deslizar-4 está seleccionado */
+    display: block; /* Muestra los controles seleccionados */
+}
+
+  
+/* Estilos de los indicadores de diapositivas */
+.deslizar-indicador {
+    list-style: none; /* Elimina los puntos de lista por defecto */
+    margin: 0; /* Elimina el margen */
+    padding: 0; /* Elimina el relleno */
+    position: absolute; /* Posición absoluta para alinear los indicadores */
+    bottom: 2%; /* Posiciona los indicadores en el 2% desde el borde inferior */
+    left: 0; /* Posiciona los indicadores a la izquierda */
+    right: 0; /* Posiciona los indicadores a la derecha */
+    text-align: center; /* Centra los indicadores horizontalmente */
+    z-index: 10; /* Índice de apilamiento para controlar la superposición */
+}
+  
+/* Estilos de cada indicador de diapositiva */
+.deslizar-indicador li {
+    display: inline-block; /* Muestra los indicadores en línea */
+    margin: 0 5px; /* Margen horizontal de 5 píxeles */
+}
+  
+  /* Estilos de los círculos de los indicadores de diapositivas */
+.deslizar-circulo {
+    color: #828282; /* Color del círculo en gris */
+    cursor: pointer; /* Cursor de tipo puntero al pasar por encima */
+    display: block; /* Muestra el círculo como bloque */
+    font-size: 35px; /* Tamaño de fuente de 35 píxeles */
+}
+
+/* Estilos de los círculos de los indicadores de diapositivas al pasar el cursor por encima */
+.deslizar-circulo:hover {
+    color: #aaaaaa; /* Color del círculo en gris claro */
+}
+
+/* Estilos de los círculos de los indicadores de diapositivas activos */
+#deslizar-1:checked ~ .control-1 ~ .deslizar-indicador li:nth-child(1) .deslizar-circulo,
+#deslizar-2:checked ~ .control-2 ~ .deslizar-indicador li:nth-child(2) .deslizar-circulo,
+#deslizar-3:checked ~ .control-3 ~ .deslizar-indicador li:nth-child(3) .deslizar-circulo,
+#deslizar-4:checked ~ .control-4 ~ .deslizar-indicador li:nth-child(4) .deslizar-circulo {
+  color: #bf42ca; /* Color del círculo activo en rosa */
+  width: 100%; /* Ancho del 100% para resaltar el círculo activo */
+  height: 50px; /* Altura de 50 píxeles para resaltar el círculo activo */
+}
