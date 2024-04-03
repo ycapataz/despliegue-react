@@ -1,6 +1,9 @@
 import React from 'react';
 import '../assets/css/style_carrusel.css';
 import '../assets/css/stylecards.css';
+import '../assets/css/menu.css'
+import menustyle from '../assets/css/menu.css'
+import Menu from '../components/Menu';
 import carrusel_imagen_1 from '../assets/images/carrusel_imagen_1.png';
 import carrusel_imagen_2 from '../assets/images/carrusel_imagen_2.png';
 import carrusel_imagen_3 from '../assets/images/carrusel_imagen_3.png';
@@ -17,6 +20,7 @@ import { NavLink } from 'react-router-dom';
 function Home() {
 return (
     <>  
+    <Menu />
         <br /><br />
             {/* se agrega la barra de busqueda con la clase src */}
             <div className="box">
@@ -25,12 +29,12 @@ return (
             {/* se agrega el boton de iniciar sesion con la clase boton */}
             <div className="boton">
                 {/* <a href="../HTML/iniciosesion.html"><input className="btn" type="submit" value="Iniciar sesion" /></a> */}
-                <NavLink to="/iniciosesion" activeClassName="active"><input className="btn" type="submit" value="Iniciar sesion" /></NavLink>
+                <NavLink to="/iniciosesion" activeClassName="active"><input className={menustyle.btn} type="submit" value="Iniciar sesion" /></NavLink>
             </div>
             {/* se agrega el boton de registrarse con la clase boton1 */}
             <div className="boton1">
                 {/* a los dos botones se les asigna una misma clase porque tienen las mismas propiedades */}
-                <NavLink to="/registrarse" activeClassName="active"><input className="btn" type="submit" value="Registrate" /></NavLink>
+                <NavLink to="/registrarse" activeClassName="active"><input className={menustyle.btn} type="submit" value="Registrate" /></NavLink>
             </div>
         <center>
             <br /><br /><br /><br />

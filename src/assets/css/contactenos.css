@@ -90,10 +90,16 @@
 /* Estilo de los mensajes de error */
 .formulario_input-error {
     display: none;
+    color: red;
     font-size: 14px;
-    margin-top: 5px; /* Espacio entre el campo y el mensaje de error */
+    margin-top: 5px;
 }
-
+.form-input.valid {
+    border-color: green;
+}
+.form-input.invalid {
+    border-color: red;
+}
 /* Mostrar mensaje de error cuando el campo es inválido */
 .campo input:invalid + .formulario_input-error {
     display: block;

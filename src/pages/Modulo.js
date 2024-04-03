@@ -6,10 +6,12 @@ import agendamiento from '../assets/images/agendamiento.png'
 import historia from '../assets/images/historia.png'
 import inventario from '../assets/images/inventario.jpg'
 import Footer from '../components/Footer';
+import Menu from '../components/Menu';
 
 function Modulo() {
     return (
     <>
+    <Menu />
     <div>
         <div className="wrapper">
             <img src={Logo_Software} alt />

@@ -1,10 +1,12 @@
 import React from 'react';
 import '../assets/css/style_error_404_y_500.css';
 import gif_404 from '../assets/images/gif_error_404.gif';
+import Menu from '../components/Menu';
 
 function Error_404() {
     return (
     <>
+    <Menu />
     <div className="error_404">
         <section className="mensaje_error">
             <section className="contenedor_mensaje-error">

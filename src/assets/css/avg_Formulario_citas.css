@@ -27,7 +27,6 @@ h1{
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 20px;
-	
 }
 .formulario__label {
 	font-size: 15PX;
@@ -103,6 +102,10 @@ main a{
 	color: #fff;
 	text-decoration: none;
 	cursor: pointer;
+}
+.container_form{
+	flex: 1;
+    padding: 20px;
 }
 
 

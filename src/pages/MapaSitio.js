@@ -1,10 +1,12 @@
 import { NavLink } from 'react-router-dom';
 import '../assets/css/mapaSitio.css';
 import React from 'react'
+import Menu from '../components/Menu';
 
 function MapaSitio() {
     return (
         <>
+        <Menu />
         <div className="mSite">
             <ul>
                 <h1>Mapa del Sitio</h1>

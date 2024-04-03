@@ -1,0 +1,111 @@
+/*Menu superior*/
+.navbar{
+	background-color:#ffffff;
+	position: relative;
+	display: block;
+}
+.imgLogo{
+	height: 4rem;
+    margin-left: 1rem;
+	border-radius: 35px;
+	margin-right: 2rem; 
+}
+.h2{
+	display: flex;
+	align-items: center; /* Centrar verticalmente */
+	justify-content: center; /* Centrar horizontalmente */
+}
+.navimg{
+	border-radius: 20px;
+	margin-right: 1rem;
+}
+.user-wrapper .small{
+	display: inline-block;
+}
+.user-wrapper{
+	display: flex;
+	align-items: center;
+}
+.containerHeder{
+	background-color:#C3F294 ;
+	display:flex;
+	justify-content: space-between;
+	padding: 1rem;
+	box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.2);
+}
+.menuSh4{
+	font-size: 1.2em;
+}
+
+/*Menu lateral*/
+
+.sidebar {
+	display: flex;
+    background-color: #C3F294;
+    width: 14rem;
+    height: calc(100vh - 52px);
+    border-right: 1px solid #C3F294;
+    overflow-y: auto;
+}
+
+.navUl {
+    list-style: none;
+    padding: 1rem 1.1rem;
+
+    .navIl {
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+
+        a {
+            text-decoration: none;
+        }
+    }
+}
+
+/*Tabla*/
+.containerTable{
+	padding: 2rem;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	background-color: white;
+	border-radius: 30px;
+	overflow: hidden;
+	.TableHeader{
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 20px 30px 0;
+		.buttonHeader{
+			outline: none;
+			border: none;
+			background-color: #56208c;
+			color: white;
+			padding: 10px 30px;
+			border-radius: 20px;
+			text-transform: uppercase;
+			font-size: 14px;
+			cursor: pointer;
+		}
+		.DivInpuctsearch{
+			position: relative;
+			.Inpuctsearch{
+				border-radius: 30px;
+				width: 400px;
+				outline: none;
+				padding: 10px 20px;
+				border: 1px solid #56208c;
+				box-sizing: border-box;
+				padding-right: 50px;
+			}
+		}
+	}
+}
+.NombreTable{
+	color: #56208c;
+}
+.tablebody {
+    overflow: auto;
+	max-width: 1000rem;
+	max-height: 25rem;
+}

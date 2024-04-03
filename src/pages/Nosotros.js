@@ -4,10 +4,12 @@ import perrito from '../assets/images/perrito.png';
 import perrito2 from '../assets/images/perrito2.png';
 import perrito3 from '../assets/images/perrito3.png';
 import Footer from '../components/Footer';
+import Menu from '../components/Menu';
 
 function Nosotros() {
     return (
         <>
+        <Menu />
         <div>
         <br /><br />
         {/*se crea una clase containerr que tendra las 3 tarjetas (nosotros, mision, vision)*/}

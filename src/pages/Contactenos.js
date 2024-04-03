@@ -1,9 +1,11 @@
 import React from 'react'
+import Menu from '../components/Menu';
 import '../assets/css/contactenos.css'
 
 function Contactenos() {
     return (
     <>
+    <Menu />
         <div className='max_conten'>
             <br /><br />
             <div className="contenedor">

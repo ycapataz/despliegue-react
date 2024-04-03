@@ -1,8 +1,10 @@
 import React from 'react'
+import Menu from '../components/Menu';
 
 function Registrarse() {
     return (
         <>
+        <Menu />
         <div className='max_conten'>
             <div className="contenedor">
                 <form action className="form">
