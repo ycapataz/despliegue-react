@@ -111,6 +111,7 @@ function CrudFormulaMedica() {
                             <th style={{ textAlign: "center" }}>Notas</th>                          
                             <th style={{ textAlign: "center" }}>Registroclinico</th>
                             <th style={{ textAlign: "center" }}>Producto</th>
+                            <th style={{ textAlign: "center" }}>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>

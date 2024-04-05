@@ -1,5 +1,6 @@
 import React from 'react'
 import '../assets/css/nosotros.css';
+import { Link, NavLink } from 'react-router-dom';
 import perrito from '../assets/images/perrito.png';
 import perrito2 from '../assets/images/perrito2.png';
 import perrito3 from '../assets/images/perrito3.png';
@@ -31,7 +32,7 @@ function Nosotros() {
                 sanación y bienestar de las mascotas.
                 </p>
                 {/*Se crea un enlace*/}
-                <a href="../HTML/modulos.html">Leer más</a>
+                <li><NavLink to="/servicios" activeClassName="active">Modulos</NavLink></li>
             </div>
             </div>
             {/*se crea una clase cardd que contendra la imagen e informacion de la segunda tarjeta (MISION)*/}

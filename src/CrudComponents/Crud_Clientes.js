@@ -13,7 +13,7 @@ function Crud_Clientes() {
     const [error, setError] = useState(null);
     const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
     const [mostrarModalGuardar, setMostrarModalGuardar] = useState(false);
-    const [datosFormularioEdicion, setDatosFormularioEdicion] = useState({ id: '', name: '', lastname: '', dni: '', phone: '', mail: '', address: '' ,city: ''});
+    const [datosFormularioEdicion, setDatosFormularioEdicion] = useState({ id: '', name: '', lastName: '', dni: '', phone: '', mail: '', address: '' ,city: ''});
     const [clienteSeleccionada, setClienteSeleccionada] = useState(null);
     const [ciudades, setCiudades] = useState([]);
 
@@ -50,7 +50,7 @@ function Crud_Clientes() {
         setDatosFormularioEdicion({
             id: cliente.id,
             name: cliente.name,
-            lastname: cliente.lastname,
+            lastName: cliente.lastName,
             dni: cliente.dni,
             phone: cliente.phone,
             mail: cliente.mail,
@@ -72,7 +72,7 @@ function Crud_Clientes() {
  
             const response = await CustomerService.createCustomer({
                 name: datosFormularioEdicion.name,
-                lastname: datosFormularioEdicion.lastname,
+                lastName: datosFormularioEdicion.lastName,
                 dni: datosFormularioEdicion.dni,
                 phone: datosFormularioEdicion.phone,
                 mail: datosFormularioEdicion.mail,
@@ -86,7 +86,7 @@ function Crud_Clientes() {
             fetchData(); // Actualiza la tabla
             cerrarModalGuardar(); // Cierra el modal
             // Limpiar los datos del formulario
-            setDatosFormularioEdicion({ id: '', name: '', lastname: '', dni: '', phone: '', mail: '', address: '', city: ''});
+            setDatosFormularioEdicion({ id: '', name: '', lastName: '', dni: '', phone: '', mail: '', address: '', city: ''});
         } catch (error) {
             console.error('Error al guardar el propietario:', error);
             // Manejar el error
@@ -104,7 +104,7 @@ const handleActualizarCliente = async (datosCliente) => {
         
         const response = await CustomerService.updateCustomer(datosCliente.id, {
             name: datosCliente.name,
-            lastname: datosCliente.lastname,
+            lastName: datosCliente.lastName,
             dni: datosCliente.dni,
             phone: datosCliente.phone,
             mail: datosCliente.mail,
@@ -196,7 +196,7 @@ return (
                     </Form.Group>
                     <Form.Group controlId="formBasiclastName">
                         <Form.Label>Apellidos</Form.Label>
-                        <Form.Control type="text" value={datosFormularioEdicion.lastname} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, lastname: e.target.value })} />
+                        <Form.Control type="text" value={datosFormularioEdicion.lastName} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, lastName: e.target.value })} />
                     </Form.Group>
                     <Form.Group controlId="formBasicDni">
                         <Form.Label>Cedula</Form.Label>
@@ -243,7 +243,7 @@ return (
                         </Form.Group>
                         <Form.Group controlId="formBasicLastName">
                             <Form.Label>Apellidos</Form.Label>
-                            <Form.Control type="text" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, lastname: e.target.value })} />
+                            <Form.Control type="text" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, lastName: e.target.value })} />
                         </Form.Group>
                         <Form.Group controlId="formBasicDni">
                             <Form.Label>Cedula</Form.Label>

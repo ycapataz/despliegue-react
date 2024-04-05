@@ -111,6 +111,7 @@ function CrudRegistroClinico() {
                             <th style={{ textAlign: "center" }}>Fecha Ingreso</th>
                             <th style={{ textAlign: "center" }}>Empleado</th>
                             <th style={{ textAlign: "center" }}>Examen</th>
+                            <th style={{ textAlign: "center" }}>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>

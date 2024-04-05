@@ -167,8 +167,8 @@ function Crud_Proveedor() {
                             <th style={{ textAlign: "center" }}>Representante</th>
                             <th style={{ textAlign: "center" }}>Correo</th>
                             <th style={{ textAlign: "center" }}>Telefono</th>
-                            <th style={{ textAlign: "center" }}>Ciudad</th>
                             <th style={{ textAlign: "center" }}>Estado</th>
+                            <th style={{ textAlign: "center" }}>Ciudad</th>
                             <th style={{ textAlign: "center" }}>NIT</th>
                             <th style={{ textAlign: "center" }}>Acciones</th>
 
