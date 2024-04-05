@@ -4,12 +4,21 @@ import { Modal, Form, Button} from 'react-bootstrap';
 import Navbar from "../components/Navbar_V";
 import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import MedicalFormulaService from '../services/MedicalFormulaService';
-import ClinicalRecordService from '../services/ClinicalRecordService';
+import ProductService from '../services/ProductService';
 import Menu_veterinario from '../components/Menu_veterinario';
 
 function CrudFormulaMedica() {
     const [clinicalRecords, setClinicalRecords] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [productos, setProductos] = useState([]);
+    const [CrearRecord, setCrearRecord] = useState({
+        dose: '',
+        duration: '',
+        amount: '',
+        observations: '',
+        idproducto: ''
+    });
     const [editedRecord, setEditedRecord] = useState({
         id: '',
         heart_rate: '',
@@ -21,14 +30,6 @@ function CrudFormulaMedica() {
         idexamenmedico: { exam: '' }
     });
 
-    // Estado para los datos editados en el modal
-    const [datosFormularioEdicion, setDatosFormularioEdicion] = useState({
-        date: '',
-        hour: '',
-        petName: '',
-        specialty: '',
-        veterinarian: ''
-    });
 
     useEffect(() => {
         const fetchClinicalRecords = async () => {
@@ -39,43 +40,94 @@ function CrudFormulaMedica() {
                 console.error('Error al obtener los registros clínicos:', error);
             }
         };
+        const fetchProducts = async () => {
+            try {
+                const response = await ProductService.getAllProducts();
+                 // Agregar esta línea para verificar los datos recibidos
+                setProductos(response.data.DATA);
+            } catch (error) {
+                console.error('Error al obtener los productos:', error);
+            }
+        };
 
         fetchClinicalRecords();
+        fetchProducts();
     }, []);
 
     const handleEditRecord = (record) => {
-        setEditedRecord(record);
-        // Aquí estableces los datos editados para el modal
-        setDatosFormularioEdicion({
-            date: record.idingreso.date,
-            hour: '', // Aquí establece la hora si es necesario
-            petName: '', // Aquí establece el nombre de la mascota
-            specialty: '', // Aquí establece la especialidad
-            veterinarian: '' // Aquí establece el veterinario
+        setEditedRecord({
+            id: record.id,
+            dose: record.dose,
+            duration: record.duration,
+            amount: record.amount,
+            observations: record.observations,
+            idproducto: editedRecord.idproducto
         });
         setShowModal(true);
-    };
+    };   
 
     const handleCloseModal = () => {
         setShowModal(false);
     };
 
+    const handleShowCreateModal = () => {
+        setShowCreateModal(true);
+    };
+
+    const handleCloseCreateModal = () => {
+        setShowCreateModal(false);
+    };
+
     const Editar = async () => {
         try {
-            await ClinicalRecordService.updateClinicalRecord(editedRecord.id, {
-                heart_rate: editedRecord.heart_rate,
-                temperature: editedRecord.temperature,
-                clinical_Record_Data: editedRecord.clinical_Record_Data,
-                observations: editedRecord.observations
+            const IdProducto = parseInt(editedRecord.idproducto);
+            await MedicalFormulaService.updateMedicalFormula(editedRecord.id, {
+                
+
+                dose: editedRecord.dose,
+                duration: editedRecord.duration,
+                amount: editedRecord.amount,
+                observations: editedRecord.observations,
+                idproducto: { id: IdProducto }
             });
             setShowModal(false);
-            // Recargar los registros clínicos después de guardar los cambios
-            const response = await ClinicalRecordService.getAllClinicalRecords();
+            // Recargar las fórmulas médicas después de guardar los cambios
+            const response = await MedicalFormulaService.getAllMedicalFormula();
             setClinicalRecords(response.data.data);
         } catch (error) {
-            console.error('Error al guardar los cambios del registro clínico:', error);
+            console.error('Error al guardar los cambios de la fórmula médica:', error);
         }
-    };  
+    };   
+    
+    const Crear = async () => {
+        try {
+            // Obtener el ID del producto seleccionado del estado editedRecord
+            const idProducto = parseInt(CrearRecord.idproducto);
+            
+            // ID predeterminado para el registro clínico
+            const idRegistroClinicoPredeterminado = 1;
+        
+            // Crear la fórmula médica con los datos proporcionados
+            await MedicalFormulaService.createMedicalFormula({
+                dose: CrearRecord.dose,
+                duration: CrearRecord.duration,
+                amount: CrearRecord.amount,
+                observations: CrearRecord.observations,
+                idproducto: { id: idProducto },
+                idregistroclinico: { id: idRegistroClinicoPredeterminado } // Establecer el valor predeterminado
+            });
+        
+            // Cerrar el modal de creación
+            setShowCreateModal(false);
+        
+            // Actualizar la lista de fórmulas médicas
+            const response = await MedicalFormulaService.getAllMedicalFormula();
+            setClinicalRecords(response.data.data);
+        } catch (error) {
+            console.error('Error al crear la fórmula médica:', error);
+            // Manejar el error
+        }
+    };                 
 
     return (
         <>
@@ -91,7 +143,7 @@ function CrudFormulaMedica() {
                 <section className="table__header">
                     <h1 className={StylesTabla.NombreTable}>Formula Medica</h1>
                     <div>
-                        <button className={StylesTabla.buttonHeader} >Crear Formula</button>
+                        <button className={StylesTabla.buttonHeader} onClick={handleShowCreateModal}>Crear Formula</button>
                     </div>
                     <br/>
                     <div className={StylesTabla.DivInpuctsearch}>
@@ -134,40 +186,40 @@ function CrudFormulaMedica() {
                 </table>
             </div>
             {/*Modal o ventana emejernte para EDITAR */}
-{/*             <Modal show={showModal} onHide={handleCloseModal}>
+            <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Editar Registro Clínico</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
-                        <Form.Group controlId="formBasicHeartRate">
-                            <Form.Label>Frecuencia Cardiaca</Form.Label>
+                        <Form.Group controlId="formBasicDose">
+                            <Form.Label>Dosis</Form.Label>
                             <Form.Control
                                 type="number"
                                 min="1"
-                                value={editedRecord.heart_rate}
-                                onChange={(e) => setEditedRecord({ ...editedRecord, heart_rate: e.target.value })}
+                                value={editedRecord.dose}
+                                onChange={(e) => setEditedRecord({ ...editedRecord, dose: e.target.value })}
                             />
                         </Form.Group>
-                        <Form.Group controlId="formBasicTemperature">
-                            <Form.Label>Temperatura</Form.Label>
+                        <Form.Group controlId="formBasicDuration">
+                            <Form.Label>Duración</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={editedRecord.duration}
+                                onChange={(e) => setEditedRecord({ ...editedRecord, duration: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="formBasicAmount">
+                            <Form.Label>Cantidad</Form.Label>
                             <Form.Control
                                 type="number"
                                 min="1"
-                                value={editedRecord.temperature}
-                                onChange={(e) => setEditedRecord({ ...editedRecord, temperature: e.target.value })}
-                            />
-                        </Form.Group>
-                        <Form.Group controlId="formBasicClinicalRecordDate">
-                            <Form.Label>Fecha Registro Clínico</Form.Label>
-                            <Form.Control
-                                type="date"
-                                value={editedRecord.clinical_Record_Data}
-                                onChange={(e) => setEditedRecord({ ...editedRecord, clinical_Record_Data: e.target.value })}
+                                value={editedRecord.amount}
+                                onChange={(e) => setEditedRecord({ ...editedRecord, amount: e.target.value })}
                             />
                         </Form.Group>
                         <Form.Group controlId="formBasicObservations">
-                            <Form.Label>Observaciones</Form.Label>
+                            <Form.Label>Notas</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -175,62 +227,80 @@ function CrudFormulaMedica() {
                                 onChange={(e) => setEditedRecord({ ...editedRecord, observations: e.target.value })}
                             />
                         </Form.Group>
+                        <Form.Group controlId="formBasicProduct">
+                            <Form.Label>Producto</Form.Label>
+                            <Form.Control as="select" value={editedRecord.idproducto} onChange={(e) => setEditedRecord({ ...editedRecord, idproducto: e.target.value })}>
+                                <option value="">Selecciona un producto</option>
+                                {productos.map(producto => (
+                                    <option key={producto.id} value={producto.id}>{producto.name}</option>
+                                ))}
+                            </Form.Control>
+                        </Form.Group>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseModal}>Cancelar</Button>
                     <Button variant="primary" style={{ background: '#56208c', borderColor: 'transparent' }} onClick={Editar}>Guardar Cambios</Button>
                 </Modal.Footer>
-            </Modal> */}
-                {/*Modal o ventana emejernte para GUARDAR */}
-                {/* <Modal show={mostrarModalGuardar} onHide={cerrarModalGuardar}>
+            </Modal>
+                {/*Modal o ventana emejernte para CREAR */}
+                <Modal show={showCreateModal} onHide={handleCloseCreateModal}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Generar Cita</Modal.Title>
+                        <Modal.Title>Crear Nueva Fórmula Médica</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Form>
-                            <Form.Group controlId="formBasicDate">
-                                <Form.Label>Fecha cita</Form.Label>
-                                <Form.Control type="date" placeholder="dd/mm/aaaa" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, date: e.target.value })} />
+                            <Form.Group controlId="formBasicDose">
+                                <Form.Label>Dosis</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    min="1"
+                                    
+                                    onChange={(e) => setCrearRecord({ ...CrearRecord, dose: e.target.value })}
+                                />
                             </Form.Group>
-                            <Form.Group controlId="formBasicHour">
-                                <Form.Label>Hora cita</Form.Label>
-                                <Form.Control type="time" placeholder="--:--" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, hour: e.target.value })} />
+                            <Form.Group controlId="formBasicDuration">
+                                <Form.Label>Duración</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    
+                                    onChange={(e) => setCrearRecord({ ...CrearRecord, duration: e.target.value })}
+                                />
                             </Form.Group>
-                            <Form.Group controlId="formBasicPetName">
-                                <Form.Label>Nombre Mascota</Form.Label>
-                                <Form.Control as="select" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, petName: e.target.value })}>
-                                    <option value="">Selecciona una mascota</option>
-                                    {mascotas.map((mascota, index) => (
-                                        <option key={index} value={mascota.name}>{mascota.name}</option>
-                                    ))}
-                                </Form.Control>
+                            <Form.Group controlId="formBasicAmount">
+                                <Form.Label>Cantidad</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    min="1"
+                                    
+                                    onChange={(e) => setCrearRecord({ ...CrearRecord, amount: e.target.value })}
+                                />
                             </Form.Group>
-                            <Form.Group controlId="formBasicSpecialty">
-                                <Form.Label>Especialidad</Form.Label>
-                                <Form.Control as="select" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, specialty: e.target.value })}>
-                                    <option value="">Selecciona una especialidad</option>
-                                    {especialidades.map((especialidad, index) => (
-                                        <option key={index} value={especialidad.name}>{especialidad.name}</option>
-                                    ))}
-                                </Form.Control>
+                            <Form.Group controlId="formBasicObservations">
+                                <Form.Label>Notas</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={3}
+                                    
+                                    onChange={(e) => setCrearRecord({ ...CrearRecord, observations: e.target.value })}
+                                />
                             </Form.Group>
-                            <Form.Group controlId="formBasicVeterinarian">
-                                <Form.Label>Veterinario</Form.Label>
-                                <Form.Control as="select"  onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, veterinarian: e.target.value })}>
-                                    <option value="">Selecciona un veterinario</option>
-                                    {veterinarios.map((veterinario, index) => (
-                                        <option key={index} value={veterinario.name}>{veterinario.name}</option>
+                            <Form.Group controlId="formBasicProduct">
+                                <Form.Label>Producto</Form.Label>
+                                <Form.Control as="select" value={CrearRecord.idproducto} onChange={(e) => setCrearRecord({ ...CrearRecord, idproducto: e.target.value })}>
+                                    <option value="">Selecciona un producto</option>
+                                    {productos.map(producto => (
+                                        <option key={producto.id} value={producto.id}>{producto.name}</option>
                                     ))}
                                 </Form.Control>
                             </Form.Group>
                         </Form>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={cerrarModalGuardar}>Cancelar</Button>
-                        <Button variant="primary" style={{background:'#56208c', borderColor: 'transparent'}} onClick={handleGuardarCita}>Guardar Cambios</Button>
+                        <Button variant="secondary" onClick={handleCloseCreateModal}>Cancelar</Button>
+                        <Button variant="primary" style={{ background: '#56208c', borderColor: 'transparent' }} onClick={Crear}>Crear Fórmula</Button>
                     </Modal.Footer>
-                </Modal> */}
+                </Modal>
         </div>
         </div>
         </div>

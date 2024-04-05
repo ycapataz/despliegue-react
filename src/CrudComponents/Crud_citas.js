@@ -68,40 +68,40 @@ function Crud_Citas() {
     };
 
     //Funcion para Guardar
-    const handleGuardarCita = async () => {
-        try {
-            // Obtener el ID de la mascota seleccionada
-            const idMascota = mascotas.find(mascota => mascota.name === datosFormularioEdicion.petName)?.id;
-            
-            // Obtener el ID de la especialidad seleccionada
-            const idEspecialidad = especialidades.find(especialidad => especialidad.name === datosFormularioEdicion.specialty)?.id;
-            
-            // Obtener el ID del veterinario seleccionado
-            const idVeterinario = veterinarios.find(veterinario => veterinario.name === datosFormularioEdicion.veterinarian)?.id;
-    
-            const response = await AppointmentService.createAppointment({
-                date: datosFormularioEdicion.date,
-                hour: datosFormularioEdicion.hour,
-                idmascota: {
-                    id: idMascota
-                },
-                idespecialidad: {
-                    id: idEspecialidad
-                },
-                idempleado: {
-                    id: idVeterinario
-                }
-            });
-            console.log('Respuesta de la API:', response.data);
-            fetchData(); // Actualiza la tabla
-            cerrarModalGuardar(); // Cierra el modal
-            // Limpiar los datos del formulario
-            setDatosFormularioEdicion({ id: '', date: '', hour: '', petName: '', specialty: '', veterinarian: '' });
-        } catch (error) {
-            console.error('Error al guardar la cita:', error);
-            // Manejar el error
-        }
-    };    
+        const handleGuardarCita = async () => {
+            try {
+                // Obtener el ID de la mascota seleccionada
+                const idMascota = mascotas.find(mascota => mascota.name === datosFormularioEdicion.petName)?.id;
+                
+                // Obtener el ID de la especialidad seleccionada
+                const idEspecialidad = especialidades.find(especialidad => especialidad.name === datosFormularioEdicion.specialty)?.id;
+                
+                // Obtener el ID del veterinario seleccionado
+                const idVeterinario = veterinarios.find(veterinario => veterinario.name === datosFormularioEdicion.veterinarian)?.id;
+        
+                const response = await AppointmentService.createAppointment({
+                    date: datosFormularioEdicion.date,
+                    hour: datosFormularioEdicion.hour,
+                    idmascota: {
+                        id: idMascota
+                    },
+                    idespecialidad: {
+                        id: idEspecialidad
+                    },
+                    idempleado: {
+                        id: idVeterinario
+                    }
+                });
+                console.log('Respuesta de la API:', response.data);
+                fetchData(); // Actualiza la tabla
+                cerrarModalGuardar(); // Cierra el modal
+                // Limpiar los datos del formulario
+                setDatosFormularioEdicion({ id: '', date: '', hour: '', petName: '', specialty: '', veterinarian: '' });
+            } catch (error) {
+                console.error('Error al guardar la cita:', error);
+                // Manejar el error
+            }
+        };    
 
     //Funcion de actualizar
     const handleActualizarCita = async (datosCita) => {
