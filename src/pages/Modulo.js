@@ -6,6 +6,14 @@ import Logo_Software from '../assets/images/Logo Software sin fondo.png'
 import agendamiento from '../assets/images/agendamiento.png'
 import historia from '../assets/images/historia.png'
 import inventario from '../assets/images/inventario.jpg'
+import React from 'react';
+import '../assets/css/nosotros.css';
+import '../assets/css/consejos.css';
+import { Link, NavLink } from 'react-router-dom';
+import Logo_Software from '../assets/images/Logo Software sin fondo.png';
+import agendamiento from '../assets/images/agendamiento.png';
+import historia from '../assets/images/historia.png';
+import inventario from '../assets/images/inventario.jpg';
 import Footer from '../components/Footer';
 import Menu from '../components/Menu';
 
@@ -49,7 +57,7 @@ function Modulo() {
                         la selección de la fecha y hora de la cita.
                     </p>
                     {/*Se crea un enlace*/}
-                    <a href="../HTML/avg_tabla_ingresos.html">Leer más</a>
+                    <li><NavLink to="/Clientes" activeClassName="active">Agendamiento</NavLink></li>
                 </div>
             </div>
             {/*se crea una clase cardd que contendra la imagen e informacion de la segunda tarjeta (MISION)*/}
@@ -68,7 +76,7 @@ function Modulo() {
                         detallado de su estado de salud a lo largo del tiempo.
                     </p>
                     {/*Se crea un enlace*/}
-                    <NavLink to="/registroClinico" activeClassName="active" className="custom-link">Leer más</NavLink>
+                    <li><NavLink to="/Cita" activeClassName="active">Historias Clinicas</NavLink></li>
                 </div>
             </div>
             {/*se crea una clase cardd que contendra la imagen e informacion de la tercera tarjeta (VISION)*/}
@@ -88,7 +96,7 @@ function Modulo() {
                         salida de productos, y la dispensación de productos a los pacientes.
                     </p>
                     {/*Se crea un enlace*/}
-                    <a href="../juand_consultar_sald_inventario.php">Leer más</a>
+                    <li><NavLink to="/Proveedor" activeClassName="active">Inventario</NavLink></li>
                 </div>
             </div>
         </div>
