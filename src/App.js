@@ -9,7 +9,9 @@ import MapaSitio from './pages/MapaSitio';
 import Modulo from './pages/Modulo';
 import CrudCitas from './CrudComponents/Crud_citas';
 import CrudRegistroClinico from './CrudComponents/CrudRegistroClinico';
+import CrudClientes from './CrudComponents/Crud_Clientes'
 import CrudFormulaMedica from './CrudComponents/CrudFormulaMedica';
+import CrudProveedor from './CrudComponents/Crud_proveedor'
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
         <Route path="/registrarse" element={<Registrarse />} />
         <Route path="/mapa_del_sitio" element={<MapaSitio />} />
         <Route path="/Cita" element={<CrudCitas />} />
+        <Route path="/Clientes" element={<CrudClientes />} />
+        <Route path="/Proveedor" element={<CrudProveedor />} />
         <Route path="/Registro_clinico" element={<CrudRegistroClinico />} />
         <Route path="/Fomula_Medica" element={<CrudFormulaMedica />} />
       </Routes>
