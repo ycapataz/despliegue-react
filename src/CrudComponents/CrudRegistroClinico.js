@@ -1,358 +1,242 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import { Modal, Form, Button} from 'react-bootstrap';
+import Navbar from "../components/Navbar_V";
+import StylesTabla from '../assets/css/avg_encabezado.module.scss';
+import ClinicalRecordService from '../services/ClinicalRecordService';
+import Menu_veterinario from '../components/Menu_veterinario';
 
-const CrudRegistroClinico = () => {
-    const [registrosClinicos, setRegistrosClinicos] = useState([]);
-    const [empleados, setEmpleados] = useState([]);
-    const [examenesMedicos, setExamenesMedicos] = useState([]);
-    const [enfermedades, setEnfermedades] = useState([]);
-    const [mascotas, setMascotas] = useState([]);
-    const [message, setMessage] = useState('');
-    const [showForm, setShowForm] = useState(false);
-    const [formType, setFormType] = useState('create');
-    const [registroClinico, setRegistroClinico] = useState({
+function CrudRegistroClinico() {
+    const [clinicalRecords, setClinicalRecords] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [editedRecord, setEditedRecord] = useState({
         id: '',
         heart_rate: '',
         observations: '',
         clinical_Record_Data: '',
         temperature: '',
-        idingreso: '',
-        idempleado: '',
-        idexamenmedico: '',
-        idenfermedad: '',
-        idmascota: ''
+        idingreso: { date: '' },
+        idempleado: { name: '' },
+        idexamenmedico: { exam: '' }
     });
 
-    const fetchRegistrosClinicos = async () => {
-        try {
-            const response = await axios.get('http://localhost:8080/api/clinicalrecords/all');
-            if (Array.isArray(response.data)) {
-                setRegistrosClinicos(response.data);
-            } else {
-                console.error('La respuesta de la API no es un array:', response.data);
-            }
-        } catch (error) {
-            console.error('Error al listar los registros clínicos', error);
-        }
-    };
-
-    const fetchEmpleados = async () => {
-        try {
-            const response = await axios.get('http://localhost:8080/api/employees/all');
-            if (Array.isArray(response.data)) {
-                setEmpleados(response.data);
-            } else {
-                console.error('La respuesta de la API no es un array:', response.data);
-            }
-        } catch (error) {
-            console.error('Error al buscar empleados', error);
-        }
-    };
-
-    const fetchExamenesMedicos = async () => {
-        try {
-            const response = await axios.get('http://localhost:8080/api/medicalExam/all');
-            if (Array.isArray(response.data)) {
-                setExamenesMedicos(response.data);
-            } else {
-                console.error('La respuesta de la API no es un array:', response.data);
-            }
-        } catch (error) {
-            console.error('Error al buscar exámenes médicos', error);
-        }
-    };
-
-    const fetchEnfermedades = async () => {
-        try {
-            const response = await axios.get('http://localhost:8080/api/diseases/all');
-            if (Array.isArray(response.data)) {
-                setEnfermedades(response.data);
-            } else {
-                console.error('La respuesta de la API no es un array:', response.data);
-            }
-        } catch (error) {
-            console.error('Error al buscar enfermedades', error);
-        }
-    };
-
-    const fetchMascotas = async () => {
-        try {
-            const response = await axios.get('http://localhost:8080/api/pet/all');
-            if (Array.isArray(response.data)) {
-                setMascotas(response.data);
-            } else {
-                console.error('La respuesta de la API no es un array:', response.data);
-            }
-        } catch (error) {
-            console.error('Error al buscar mascotas', error);
-        }
-    };
+    // Estado para los datos editados en el modal
+    const [datosFormularioEdicion, setDatosFormularioEdicion] = useState({
+        date: '',
+        hour: '',
+        petName: '',
+        specialty: '',
+        veterinarian: ''
+    });
 
     useEffect(() => {
-        fetchRegistrosClinicos();
-        fetchEmpleados();
-        fetchExamenesMedicos();
-        fetchEnfermedades();
-        fetchMascotas();
+        const fetchClinicalRecords = async () => {
+            try {
+                const response = await ClinicalRecordService.getAllClinicalRecords();
+                setClinicalRecords(response.data);
+            } catch (error) {
+                console.error('Error al obtener los registros clínicos:', error);
+            }
+        };
+
+        fetchClinicalRecords();
     }, []);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setRegistroClinico({
-            ...registroClinico,
-            [name]: value
+    const handleEditRecord = (record) => {
+        setEditedRecord(record);
+        // Aquí estableces los datos editados para el modal
+        setDatosFormularioEdicion({
+            date: record.idingreso.date,
+            hour: '', // Aquí establece la hora si es necesario
+            petName: '', // Aquí establece el nombre de la mascota
+            specialty: '', // Aquí establece la especialidad
+            veterinarian: '' // Aquí establece el veterinario
         });
+        setShowModal(true);
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (formType === 'create') {
-            await createRegistroClinico();
-        } else {
-            await updateRegistroClinico();
-        }
+    const handleCloseModal = () => {
+        setShowModal(false);
     };
 
-    const createRegistroClinico = async () => {
+    const Editar = async () => {
         try {
-            await axios.post('http://localhost:8080/api/clinicalrecords/create', registroClinico);
-            setShowForm(false);
-            fetchRegistrosClinicos();
-            setMessage('Registro clínico creado exitosamente');
+            await ClinicalRecordService.updateClinicalRecord(editedRecord.id, {
+                heart_rate: editedRecord.heart_rate,
+                temperature: editedRecord.temperature,
+                clinical_Record_Data: editedRecord.clinical_Record_Data,
+                observations: editedRecord.observations
+            });
+            setShowModal(false);
+            // Recargar los registros clínicos después de guardar los cambios
+            const response = await ClinicalRecordService.getAllClinicalRecords();
+            setClinicalRecords(response.data);
         } catch (error) {
-            console.error('Error al crear el registro clínico', error);
+            console.error('Error al guardar los cambios del registro clínico:', error);
         }
-    };
-
-    const updateRegistroClinico = async () => {
-        try {
-            await axios.put(`http://localhost:8080/api/clinicalrecords/update/${registroClinico.id}`, registroClinico);
-            setShowForm(false);
-            fetchRegistrosClinicos();
-            setMessage('Registro clínico actualizado exitosamente');
-        } catch (error) {
-            console.error('Error al actualizar el registro clínico', error);
-        }
-    };
-
-    const showCreateForm = () => {
-        setShowForm(true);
-        setFormType('create');
-        setRegistroClinico({
-            id: '',
-            heart_rate: '',
-            observations: '',
-            clinical_Record_Data: '',
-            temperature: '',
-            idingreso: '',
-            idempleado: '',
-            idexamenmedico: '',
-            idenfermedad: '',
-            idmascota: ''
-        });
-    };
-
-    const showEditForm = (selectedRegistroClinico) => {
-        if (selectedRegistroClinico) {
-            setShowForm(true);
-            setFormType('edit');
-            setRegistroClinico(selectedRegistroClinico);
-        } else {
-            console.error('Error: No se ha seleccionado ningún registro clínico para editar');
-        }
-    };
+    };  
 
     return (
         <>
-            <div className='registro-clinico'>
-                <h2>Lista de registros clínicos</h2>
-                <button
-                    className='btn btn-primary'
-                    onClick={showCreateForm}
-                    style={{ backgroundColor: '#1E4C40', borderColor: '#1E4C40' }}
-                >
-                    Crear Registro Clínico
-                </button>
-                {showForm && (
-                    <div className='card'>
-                        <div className='card-header'>
-                            <h3 className='cart-title'>
-                                {formType === "create" ? (
-                                    <><span>Crear Registro Clínico</span></>
-                                ) : (
-                                    <><span>Editar registro clínico</span></>
-                                )}
-                            </h3>
-                            <button
-                                type="button"
-                                className="btn-close"
-                                aria-label="Close"
-                                onClick={() => setShowForm(false)}
-                            ></button>
-                        </div>
-                        <div className='card-body'>
-                            <form onSubmit={handleSubmit}>
-                                <div className="mb-3">
-                                    <label className="form-label">Frecuencia Cardíaca</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Frecuencia Cardíaca"
-                                        name="heart_rate"
-                                        value={registroClinico.heart_rate}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                                <div className="mb-3">
-                                    <label className="form-label">Observaciones</label>
-                                    <textarea
-                                        className="form-control"
-                                        placeholder="Observaciones"
-                                        name="observations"
-                                        value={registroClinico.observations}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                                <div className="mb-3">
-                                    <label className="form-label">Fecha de Registro Clínico</label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        placeholder="Fecha de Registro Clínico"
-                                        name="clinical_Record_Data"
-                                        value={registroClinico.clinical_Record_Data}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                                <div className="mb-3">
-                                    <label className="form-label">Temperatura</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Temperatura"
-                                        name="temperature"
-                                        value={registroClinico.temperature}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                                <div className='mb-3'>
-                                    <label className='form-label'>Empleado</label>
-                                    <select
-                                        className='form-select'
-                                        name='idempleado'
-                                        value={registroClinico.idempleado}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">Selecciona un empleado</option>
-                                        {empleados.map((empleado) => (
-                                            <option key={empleado.id} value={empleado.id}>
-                                                {empleado.nombre}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className='mb-3'>
-                                    <label className='form-label'>Examen Médico</label>
-                                    <select
-                                        className='form-select'
-                                        name='idexamenmedico'
-                                        value={registroClinico.idexamenmedico}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">Selecciona un examen médico</option>
-                                        {examenesMedicos.map((examen) => (
-                                            <option key={examen.id} value={examen.id}>
-                                                {examen.nombre}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className='mb-3'>
-                                    <label className='form-label'>Enfermedad</label>
-                                    <select
-                                        className='form-select'
-                                        name='idenfermedad'
-                                        value={registroClinico.idenfermedad}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">Selecciona una enfermedad</option>
-                                        {enfermedades.map((enfermedad) => (
-                                            <option key={enfermedad.id} value={enfermedad.id}>
-                                                {enfermedad.nombre}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className='mb-3'>
-                                    <label className='form-label'>Mascota</label>
-                                    <select
-                                        className='form-select'
-                                        name='idmascota'
-                                        value={registroClinico.idmascota}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">Selecciona una mascota</option>
-                                        {mascotas.map((mascota) => (
-                                            <option key={mascota.id} value={mascota.id}>
-                                                {mascota.nombre}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <button type="submit" className="btn btn-success me-2" style={{ backgroundColor: '#1E4C40', borderColor: '#1E4C40' }}>
-                                    {formType === 'create' ? 'Crear' : 'Editar'}
-                                </button>
-                                <button type="button" className="btn btn-secondary me-2" style={{ backgroundColor: '#a11129' }} onClick={() => setShowForm(false)}>
-                                    Cancelar
-                                </button>
-                            </form>
-                        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }} >
+        <Menu_veterinario/>
+        <div style={{ display: 'flex', flexGrow: 1 }}>
+        <div>
+            <Navbar/>
+        </div>
+        {/*Tabla donde se muestra todo*/}
+        <div className={StylesTabla.containerTable}>
+            <div className={StylesTabla.TableHeader}>
+                <section className="table__header">
+                    <h1 className={StylesTabla.NombreTable}>Registro Clinico</h1>
+                    <div>
+                        <button className={StylesTabla.buttonHeader} >Crear Registro</button>
                     </div>
-                )}
-                <table className="table mt-4">
+                    <br/>
+                    <div className={StylesTabla.DivInpuctsearch}>
+                        <input className={StylesTabla.Inpuctsearch} type="search" placeholder="Buscar" />
+                        <i className="bi bi-search-heart" style={{ color: '#56208c', position: 'absolute', top: '10px', right: '1rem', fontSize: '1.2rem' }}></i>
+                    </div>
+                </section>
+            </div>
+            <div className={StylesTabla.tablebody}>
+                <table className="table table-striped table-hover">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Frecuencia Cardíaca</th>
-                            <th>Observaciones</th>
-                            <th>Fecha de Registro Clínico</th>
-                            <th>Temperatura</th>
-                            <th>Empleado</th>
-                            <th>Examen Médico</th>
-                            <th>Enfermedad</th>
-                            <th>Mascota</th>
-                            <th>Acciones</th>
+                            <th style={{ textAlign: "center" }}>ID</th>
+                            <th style={{ textAlign: "center" }}>Frecuencia Cardica</th>
+                            <th style={{ textAlign: "center" }}>Temperatura</th>
+                            <th style={{ textAlign: "center" }}>Fecha Registro Clinico</th>
+                            <th style={{ textAlign: "center" }}>Observaciones</th>                          
+                            <th style={{ textAlign: "center" }}>Fecha Ingreso</th>
+                            <th style={{ textAlign: "center" }}>Empleado</th>
+                            <th style={{ textAlign: "center" }}>Examen</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {registrosClinicos.map((registro) => (
-                            <tr key={registro.id}>
-                                <td>{registro.id}</td>
-                                <td>{registro.heart_rate}</td>
-                                <td>{registro.observations}</td>
-                                <td>{registro.clinical_Record_Data}</td>
-                                <td>{registro.temperature}</td>
-                                <td>{registro.idempleado ? registro.idempleado.nombre : 'N/A'}</td>
-                                <td>{registro.idexamenmedico ? registro.idexamenmedico.nombre : 'N/A'}</td>
-                                <td>{registro.idenfermedad ? registro.idenfermedad.nombre : 'N/A'}</td>
-                                <td>{registro.idmascota ? registro.idmascota.nombre : 'N/A'}</td>
-                                <td>
-                                    <button
-                                        className="btn btn-primary btn-sm"
-                                        onClick={() => showEditForm(registro)}
-                                        style={{ backgroundColor: '#1E4C40', borderColor: '#1E4C40' }}
-                                    >
-                                        Editar
+                        {clinicalRecords.map(record => (
+                                <tr key={record.id}>
+                                <td style={{ textAlign: "center" }}>{record.id}</td>
+                                <td style={{ textAlign: "center" }}>{record.heart_rate}</td>
+                                <td style={{ textAlign: "center" }}>{record.temperature}</td>
+                                <td style={{ textAlign: "center" }}>{record.clinical_Record_Data}</td>
+                                <td style={{ textAlign: "center" }}>{record.observations}</td>
+                                <td style={{ textAlign: "center" }}>{record.idingreso.date}</td>
+                                <td style={{ textAlign: "center" }}>{record.idempleado.name}</td>
+                                <td style={{ textAlign: "center" }}>{record.idexamenmedico.exam}</td>
+                                <td style={{ textAlign: "center" }}>
+                                    <button type="button" className="btn btn-primary btn-sm" style={{ height: '3rem', width: '3rem', background: 'transparent', boxShadow: 'none', borderColor: 'transparent' }} onClick={() => handleEditRecord(record)} >
+                                        <i className="bi bi-pencil-square" style={{ fontSize: '2rem', textAlign: "center", cursor: 'pointer' }}></i>
                                     </button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
-                {message && <p>{message}</p>}
             </div>
+            {/*Modal o ventana emejernte para EDITAR */}
+            <Modal show={showModal} onHide={handleCloseModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Editar Registro Clínico</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="formBasicHeartRate">
+                            <Form.Label>Frecuencia Cardiaca</Form.Label>
+                            <Form.Control
+                                type="number"
+                                min="1"
+                                value={editedRecord.heart_rate}
+                                onChange={(e) => setEditedRecord({ ...editedRecord, heart_rate: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="formBasicTemperature">
+                            <Form.Label>Temperatura</Form.Label>
+                            <Form.Control
+                                type="number"
+                                min="1"
+                                value={editedRecord.temperature}
+                                onChange={(e) => setEditedRecord({ ...editedRecord, temperature: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="formBasicClinicalRecordDate">
+                            <Form.Label>Fecha Registro Clínico</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={editedRecord.clinical_Record_Data}
+                                onChange={(e) => setEditedRecord({ ...editedRecord, clinical_Record_Data: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="formBasicObservations">
+                            <Form.Label>Observaciones</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={editedRecord.observations}
+                                onChange={(e) => setEditedRecord({ ...editedRecord, observations: e.target.value })}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>Cancelar</Button>
+                    <Button variant="primary" style={{ background: '#56208c', borderColor: 'transparent' }} onClick={Editar}>Guardar Cambios</Button>
+                </Modal.Footer>
+            </Modal>
+                {/*Modal o ventana emejernte para GUARDAR */}
+                {/* <Modal show={mostrarModalGuardar} onHide={cerrarModalGuardar}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Generar Cita</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form>
+                            <Form.Group controlId="formBasicDate">
+                                <Form.Label>Fecha cita</Form.Label>
+                                <Form.Control type="date" placeholder="dd/mm/aaaa" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, date: e.target.value })} />
+                            </Form.Group>
+                            <Form.Group controlId="formBasicHour">
+                                <Form.Label>Hora cita</Form.Label>
+                                <Form.Control type="time" placeholder="--:--" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, hour: e.target.value })} />
+                            </Form.Group>
+                            <Form.Group controlId="formBasicPetName">
+                                <Form.Label>Nombre Mascota</Form.Label>
+                                <Form.Control as="select" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, petName: e.target.value })}>
+                                    <option value="">Selecciona una mascota</option>
+                                    {mascotas.map((mascota, index) => (
+                                        <option key={index} value={mascota.name}>{mascota.name}</option>
+                                    ))}
+                                </Form.Control>
+                            </Form.Group>
+                            <Form.Group controlId="formBasicSpecialty">
+                                <Form.Label>Especialidad</Form.Label>
+                                <Form.Control as="select" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, specialty: e.target.value })}>
+                                    <option value="">Selecciona una especialidad</option>
+                                    {especialidades.map((especialidad, index) => (
+                                        <option key={index} value={especialidad.name}>{especialidad.name}</option>
+                                    ))}
+                                </Form.Control>
+                            </Form.Group>
+                            <Form.Group controlId="formBasicVeterinarian">
+                                <Form.Label>Veterinario</Form.Label>
+                                <Form.Control as="select"  onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, veterinarian: e.target.value })}>
+                                    <option value="">Selecciona un veterinario</option>
+                                    {veterinarios.map((veterinario, index) => (
+                                        <option key={index} value={veterinario.name}>{veterinario.name}</option>
+                                    ))}
+                                </Form.Control>
+                            </Form.Group>
+                        </Form>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={cerrarModalGuardar}>Cancelar</Button>
+                        <Button variant="primary" style={{background:'#56208c', borderColor: 'transparent'}} onClick={handleGuardarCita}>Guardar Cambios</Button>
+                    </Modal.Footer>
+                </Modal> */}
+        </div>
+        </div>
+        </div>
         </>
     );
-};
+}
 
 export default CrudRegistroClinico;

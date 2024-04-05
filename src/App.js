@@ -26,7 +26,7 @@ function App() {
         <Route path="/registrarse" element={<Registrarse />} />
         <Route path="/mapa_del_sitio" element={<MapaSitio />} />
         <Route path="/Cita" element={<CrudCitas />} />
-        <Route path="/Registro_clinico" element={<CrudRegistroClinico />} />
+        <Route path="/registroClinico" element={<CrudRegistroClinico />} />
         <Route path="/Fomula_Medica" element={<CrudFormulaMedica />} />
       </Routes>
     </div>

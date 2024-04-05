@@ -1,6 +1,7 @@
 import React from 'react'
 import '../assets/css/nosotros.css'
 import '../assets/css/consejos.css'
+import { NavLink } from 'react-router-dom';
 import Logo_Software from '../assets/images/Logo Software sin fondo.png'
 import agendamiento from '../assets/images/agendamiento.png'
 import historia from '../assets/images/historia.png'
@@ -67,7 +68,7 @@ function Modulo() {
                         detallado de su estado de salud a lo largo del tiempo.
                     </p>
                     {/*Se crea un enlace*/}
-                    <a href="../HTML/ydcapa_tabla_ingreso.html">Leer más</a>
+                    <NavLink to="/registroClinico" activeClassName="active" className="custom-link">Leer más</NavLink>
                 </div>
             </div>
             {/*se crea una clase cardd que contendra la imagen e informacion de la tercera tarjeta (VISION)*/}
