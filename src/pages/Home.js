@@ -17,6 +17,7 @@ import Footer from '../components/Footer';
 import { NavLink } from 'react-router-dom';
 
 
+
 function Home() {
 return (
     <>  
@@ -29,12 +30,12 @@ return (
             {/* se agrega el boton de iniciar sesion con la clase boton */}
             <div className="boton">
                 {/* <a href="../HTML/iniciosesion.html"><input className="btn" type="submit" value="Iniciar sesion" /></a> */}
-                <NavLink to="/iniciosesion" activeClassName="active"><input className={menustyle.btn} type="submit" value="Iniciar sesion" /></NavLink>
+                <NavLink to="/iniciosesion" activeClassName="active"><input className={menustyle.btn} style={{width:'150px', height: '50px', borderRadius: '30px', outline: 'none',border:'none', backgroundColor:'#56208c', color:'white' }} type="submit" value="Iniciar sesion" /></NavLink>
             </div>
             {/* se agrega el boton de registrarse con la clase boton1 */}
             <div className="boton1">
                 {/* a los dos botones se les asigna una misma clase porque tienen las mismas propiedades */}
-                <NavLink to="/registrarse" activeClassName="active"><input className={menustyle.btn} type="submit" value="Registrate" /></NavLink>
+                <NavLink to="/registrarse" activeClassName="active"><input className={menustyle.btn} style={{width:'150px', height: '50px', borderRadius: '30px',outline: 'none',border:'none', backgroundColor:'#56208c',color:'white' }} type="submit" value="Registrate" /></NavLink>
             </div>
         <center>
             <br /><br /><br /><br />

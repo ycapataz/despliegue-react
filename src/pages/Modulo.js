@@ -7,8 +7,6 @@ import historia from '../assets/images/historia.png'
 import inventario from '../assets/images/inventario.jpg'
 import { Link, NavLink } from 'react-router-dom';
 import '../assets/css/nosotros.css';
-import '../assets/css/consejos.css';
-import inventario from '../assets/images/inventario.jpg';
 import Footer from '../components/Footer';
 import Menu from '../components/Menu';
 
@@ -71,7 +69,7 @@ function Modulo() {
                         detallado de su estado de salud a lo largo del tiempo.
                     </p>
                     {/*Se crea un enlace*/}
-                    <li><NavLink to="/Registro_clinico" activeClassName="active">Historias Clinicas</NavLink></li>
+                    <li><NavLink to="/Fomula_Medica" activeClassName="active">Historias Clinicas</NavLink></li>
                 </div>
             </div>
             {/*se crea una clase cardd que contendra la imagen e informacion de la tercera tarjeta (VISION)*/}

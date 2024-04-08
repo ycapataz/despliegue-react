@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Modal, Form, Button} from 'react-bootstrap';
 import Navbar from "../components/Navbar_V";
 import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import ClinicalRecordService from '../services/ClinicalRecordService';
 import Menu_veterinario from '../components/Menu_veterinario';
+import DiseaseService from '../services/DiseaseService';
 
 function CrudRegistroClinico() {
     const [clinicalRecords, setClinicalRecords] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [Enfermedades, setEnfermedad] = useState([]);
     const [editedRecord, setEditedRecord] = useState({
         id: '',
         heart_rate: '',
@@ -17,17 +20,19 @@ function CrudRegistroClinico() {
         temperature: '',
         idingreso: { date: '' },
         idempleado: { name: '' },
-        idexamenmedico: { exam: '' }
+        idexamenmedico: { exam: '' },
+        idmascota:{ name: ''},
+        idenfermedad:{ name: '' }
     });
 
-    // Estado para los datos editados en el modal
-    const [datosFormularioEdicion, setDatosFormularioEdicion] = useState({
-        date: '',
-        hour: '',
-        petName: '',
-        specialty: '',
-        veterinarian: ''
-    });
+        // Estado para los datos editados en el modal
+        const [datosFormularioEdicion, setDatosFormularioEdicion] = useState({
+            date: '',
+            hour: '',
+            petName: '',
+            specialty: '',
+            veterinarian: ''
+        });
 
     useEffect(() => {
         const fetchClinicalRecords = async () => {
@@ -38,8 +43,18 @@ function CrudRegistroClinico() {
                 console.error('Error al obtener los registros clínicos:', error);
             }
         };
+        const fetchEnfermedad = async () => {
+            try {
+                const response = await DiseaseService.getAllDiseases();
+                 // Agregar esta línea para verificar los datos recibidos
+                setEnfermedad(response.data);
+            } catch (error) {
+                console.error('Error al obtener las mascotas:', error);
+            }
+        };
 
         fetchClinicalRecords();
+        fetchEnfermedad();
     }, []);
 
     const handleEditRecord = (record) => {
@@ -50,13 +65,19 @@ function CrudRegistroClinico() {
             hour: '', // Aquí establece la hora si es necesario
             petName: '', // Aquí establece el nombre de la mascota
             specialty: '', // Aquí establece la especialidad
-            veterinarian: '' // Aquí establece el veterinario
+            veterinarian: '', // Aquí establece el veterinario
+            idenfermedad: editedRecord.idenfermedad
         });
         setShowModal(true);
     };
 
     const handleCloseModal = () => {
         setShowModal(false);
+        Swal.fire({
+            icon: 'info',
+            title: 'Cancelado',
+            text: 'La edición ha sido cancelada.'
+        });
     };
 
     const Editar = async () => {
@@ -65,14 +86,25 @@ function CrudRegistroClinico() {
                 heart_rate: editedRecord.heart_rate,
                 temperature: editedRecord.temperature,
                 clinical_Record_Data: editedRecord.clinical_Record_Data,
-                observations: editedRecord.observations
+                observations: editedRecord.observations,
+                idenfermedad: { id: editedRecord.idenfermedad }
             });
             setShowModal(false);
             // Recargar los registros clínicos después de guardar los cambios
             const response = await ClinicalRecordService.getAllClinicalRecords();
             setClinicalRecords(response.data);
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'Los cambios se guardaron correctamente.'
+            });
         } catch (error) {
             console.error('Error al guardar los cambios del registro clínico:', error);
+            Swal.fire({
+                icon: 'error',
+                title: '¡Error!',
+                text: 'Hubo un error al guardar los cambios.'
+            });
         }
     };  
 
@@ -109,8 +141,10 @@ function CrudRegistroClinico() {
                             <th style={{ textAlign: "center" }}>Fecha Registro Clinico</th>
                             <th style={{ textAlign: "center" }}>Observaciones</th>                          
                             <th style={{ textAlign: "center" }}>Fecha Ingreso</th>
-                            <th style={{ textAlign: "center" }}>Empleado</th>
+                            <th style={{ textAlign: "center" }}>Creado por</th>
                             <th style={{ textAlign: "center" }}>Examen</th>
+                            <th style={{ textAlign: "center" }}>mascotas</th>
+                            <th style={{ textAlign: "center" }}>Enfemedad</th>
                             <th style={{ textAlign: "center" }}>Acciones</th>
                         </tr>
                     </thead>
@@ -125,6 +159,8 @@ function CrudRegistroClinico() {
                                 <td style={{ textAlign: "center" }}>{record.idingreso.date}</td>
                                 <td style={{ textAlign: "center" }}>{record.idempleado.name}</td>
                                 <td style={{ textAlign: "center" }}>{record.idexamenmedico.exam}</td>
+                                <td style={{ textAlign: "center" }}>{record.idmascota.name}</td>
+                                {<td style={{ textAlign: "center" }}>{record.idenfermedad.name}</td>}
                                 <td style={{ textAlign: "center" }}>
                                     <button type="button" className="btn btn-primary btn-sm" style={{ height: '3rem', width: '3rem', background: 'transparent', boxShadow: 'none', borderColor: 'transparent' }} onClick={() => handleEditRecord(record)} >
                                         <i className="bi bi-pencil-square" style={{ fontSize: '2rem', textAlign: "center", cursor: 'pointer' }}></i>
@@ -160,14 +196,6 @@ function CrudRegistroClinico() {
                                 onChange={(e) => setEditedRecord({ ...editedRecord, temperature: e.target.value })}
                             />
                         </Form.Group>
-                        <Form.Group controlId="formBasicClinicalRecordDate">
-                            <Form.Label>Fecha Registro Clínico</Form.Label>
-                            <Form.Control
-                                type="date"
-                                value={editedRecord.clinical_Record_Data}
-                                onChange={(e) => setEditedRecord({ ...editedRecord, clinical_Record_Data: e.target.value })}
-                            />
-                        </Form.Group>
                         <Form.Group controlId="formBasicObservations">
                             <Form.Label>Observaciones</Form.Label>
                             <Form.Control
@@ -177,6 +205,15 @@ function CrudRegistroClinico() {
                                 onChange={(e) => setEditedRecord({ ...editedRecord, observations: e.target.value })}
                             />
                         </Form.Group>
+{                        <Form.Group controlId="formBasicMacota">
+                                <Form.Label>Enfermedades</Form.Label>
+                                <Form.Control as="select" value={editedRecord.idenfermedad} onChange={(e) => setEditedRecord({ ...editedRecord, idenfermedad: e.target.value })}>
+                                    <option value="">Selecciona una enfermedad</option>
+                                    {Enfermedades.map(enfermedad => (
+                                        <option key={enfermedad.id} value={enfermedad.id}>{enfermedad.name}</option>
+                                    ))}
+                                </Form.Control>
+                        </Form.Group>}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>

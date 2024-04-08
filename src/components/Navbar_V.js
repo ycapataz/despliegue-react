@@ -23,10 +23,10 @@ function Navbar() {
                 </li>
                 <li className={styleNavL.navIl}>
                     <NavLink to='/notificaciones' className='px-1 w-100 d-inline-bock py-2'><FaIcons.FaCommentMedical className='me-3' />Notificaciones</NavLink>
-                </li>
-                <li className={styleNavL.navIl}>
-                    <NavLink to='/salir' className='px-1 w-100 d-inline-bock py-2'><FaIcons6.FaRightToBracket className='me-3' />Salir</NavLink>
                 </li> */}
+                <li className={styleNavL.navIl}>
+                    <NavLink to='/' className='px-1 w-100 d-inline-bock py-2'><FaIcons6.FaRightToBracket className='me-3' />Salir</NavLink>
+                </li>
             </ul>
         </div>
     );

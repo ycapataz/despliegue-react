@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Modal, Form, Button} from 'react-bootstrap';
 import Navbar from "../components/Navbar_V";
@@ -68,6 +69,11 @@ function CrudFormulaMedica() {
 
     const handleCloseModal = () => {
         setShowModal(false);
+        Swal.fire({
+            icon: 'info',
+            title: 'Cancelado',
+            text: 'La edición ha sido cancelada.'
+        });
     };
 
     const handleShowCreateModal = () => {
@@ -94,8 +100,18 @@ function CrudFormulaMedica() {
             // Recargar las fórmulas médicas después de guardar los cambios
             const response = await MedicalFormulaService.getAllMedicalFormula();
             setClinicalRecords(response.data.data);
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'Los cambios se guardaron correctamente.'
+            });
         } catch (error) {
             console.error('Error al guardar los cambios de la fórmula médica:', error);
+            Swal.fire({
+                icon: 'error',
+                title: '¡Error!',
+                text: 'Hubo un error al guardar los cambios.'
+            });
         }
     };   
     

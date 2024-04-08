@@ -224,11 +224,11 @@ function Crud_Prducto() {
                         </Form.Group>
                         <Form.Group controlId="formBasicHour">
                             <Form.Label>Cantidad</Form.Label>
-                            <Form.Control type="text" value={datosFormularioEdicion.amount} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, amount: e.target.value })} />
+                            <Form.Control type="number" min="1" max="500" value={datosFormularioEdicion.amount} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, amount: e.target.value })} />
                         </Form.Group>
                         <Form.Group controlId="formBasicHour">
                             <Form.Label>Lote</Form.Label>
-                            <Form.Control type="number" value={datosFormularioEdicion.batch} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, batch: e.target.value })} />
+                            <Form.Control type="number" min="1" value={datosFormularioEdicion.batch} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, batch: e.target.value })} />
                         </Form.Group>
                         <Form.Group controlId="formBasicPetName">
                             <Form.Label>Categoria</Form.Label>
@@ -281,11 +281,11 @@ function Crud_Prducto() {
                             </Form.Group>
                             <Form.Group controlId="formBasicDate">
                                 <Form.Label>Cantidad</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese la cantidad del producto" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, amount: e.target.value })} />
+                                <Form.Control type="number" min="1" max="500" placeholder="Ingrese la cantidad del producto" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, amount: e.target.value })} />
                             </Form.Group>
                             <Form.Group controlId="formBasicHour">
                                 <Form.Label>Lote</Form.Label>
-                                <Form.Control type="number" placeholder="Ingrese el lote del producto" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, batch: e.target.value })} />
+                                <Form.Control type="number" min="1" placeholder="Ingrese el lote del producto" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, batch: e.target.value })} />
                             </Form.Group>
                             <Form.Group controlId="formBasicPetName">
                                 <Form.Label>Categoria</Form.Label>

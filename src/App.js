@@ -33,7 +33,6 @@ function App() {
         <Route path="/Clientes" element={<CrudClientes />} />
         <Route path="/Producto" element={<CrudProducto />} />
         <Route path="/Proveedor" element={<CrudProveedor />} />
-        <Route path="/Registro_clinico" element={<CrudRegistroClinico />} />
         <Route path="/Fomula_Medica" element={<CrudFormulaMedica />} />
       </Routes>
     </div>

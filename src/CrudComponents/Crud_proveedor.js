@@ -157,7 +157,9 @@ function Crud_Proveedor() {
                         <i className="bi bi-search-heart" style={{ color: '#56208c', position: 'absolute', top: '10px', right: '1rem', fontSize: '1.2rem' }}></i>
                     </div>
                 </section>
+                <br/><br/>
             </div>
+            
             <div className={StylesTabla.tablebody}>
                 <table className="table table-striped table-hover">
                     <thead>
@@ -171,7 +173,6 @@ function Crud_Proveedor() {
                             <th style={{ textAlign: "center" }}>Ciudad</th>
                             <th style={{ textAlign: "center" }}>NIT</th>
                             <th style={{ textAlign: "center" }}>Acciones</th>
-
                         </tr>
                     </thead>
                     <tbody>
@@ -212,11 +213,11 @@ function Crud_Proveedor() {
                         </Form.Group>
                         <Form.Group controlId="formBasicHour">
                             <Form.Label>Correo</Form.Label>
-                            <Form.Control type="text" value={datosFormularioEdicion.mail} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, mail: e.target.value })} />
+                            <Form.Control type="mail" value={datosFormularioEdicion.mail} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, mail: e.target.value })} />
                         </Form.Group>
                         <Form.Group controlId="formBasicHour">
                             <Form.Label>Telefono</Form.Label>
-                            <Form.Control type="number" value={datosFormularioEdicion.phone} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, phone: e.target.value })} />
+                            <Form.Control type="number" min="300" value={datosFormularioEdicion.phone} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, phone: e.target.value })} />
                         </Form.Group>
                         <Form.Group controlId="formBasicPetName">
                             <Form.Label>Ciudad</Form.Label>
@@ -264,11 +265,11 @@ function Crud_Proveedor() {
                             </Form.Group>
                             <Form.Group controlId="formBasicDate">
                                 <Form.Label>Correo</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese el correo del proveedor" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, mail: e.target.value })} />
+                                <Form.Control type="mail" placeholder="Ingrese el correo del proveedor" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, mail: e.target.value })} />
                             </Form.Group>
                             <Form.Group controlId="formBasicHour">
                                 <Form.Label>Telefono</Form.Label>
-                                <Form.Control type="number" placeholder="Ingrese el telefono del proveedor" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, phone: e.target.value })} />
+                                <Form.Control type="number" min="3" placeholder="Ingrese el telefono del proveedor" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, phone: e.target.value })} />
                             </Form.Group>
                             <Form.Group controlId="formBasicSpecialty">
                                 <Form.Label>Estado</Form.Label>
