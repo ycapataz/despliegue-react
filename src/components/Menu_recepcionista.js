@@ -1,10 +1,14 @@
-import React from 'react'
+import React, { useContext } from 'react';
 import style from '../assets/css/avg_encabezado.module.scss';
 import logo1 from '../assets/images/logo1.png';
 import recepcinista from '../assets/images/recepcionista_perfil.jpg';
 import 'bootstrap/scss/bootstrap.scss';
+import UserContext from '../context/UserContext';
 
 function Menu_recepcionista() {
+    const { user } = useContext(UserContext);
+    const nombreUsuario = user ? user.name : 'Nombre no disponible';
+    console.log('Nombre recibido en Menu_recepcionista:',  nombreUsuario);
 return (
     <>
     {/*Menu superior*/}
@@ -17,7 +21,7 @@ return (
             <div class={style["user-wrapper"]}>
                 <img className={style.navimg} src={recepcinista} width="45rem"height="45rem" alt=""/>
                 <div>
-                    <h4 className={style.menuSh4}>PAOLA ANDREA MARLETO</h4>
+                    <h4 className={style.menuSh4}>{nombreUsuario}</h4>
                     <small>Recepcionista</small>
                 </div>
             </div>

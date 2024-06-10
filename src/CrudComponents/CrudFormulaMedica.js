@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Modal, Form, Button} from 'react-bootstrap';
@@ -6,13 +7,19 @@ import Navbar from "../components/Navbar_V";
 import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import MedicalFormulaService from '../services/MedicalFormulaService';
 import ProductService from '../services/ProductService';
-import Menu_veterinario from '../components/Menu_veterinario';
+import MenuVeterinario from '../components/Menu_veterinario';
 
 function CrudFormulaMedica() {
+    const location = useLocation();
+    const { nombre } = location.state || {};
     const [clinicalRecords, setClinicalRecords] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [productos, setProductos] = useState([]);
+    const [terminoBusqueda, setTerminoBusqueda] = useState('');
+    const handleChangeBusqueda = (event) => {
+        setTerminoBusqueda(event.target.value);
+    };
     const [CrearRecord, setCrearRecord] = useState({
         dose: '',
         duration: '',
@@ -143,12 +150,28 @@ function CrudFormulaMedica() {
             console.error('Error al crear la fórmula médica:', error);
             // Manejar el error
         }
-    };                 
+    };
+    // Función para manejar el cambio en el input de búsqueda
+    const manejarCambioBusqueda = (e) => {
+        setTerminoBusqueda(e.target.value);
+    };
+    // Filtrar los registros clínicos según el término de búsqueda
+    const FormulaMFiltrada = clinicalRecords.filter(record => {
+        return (
+            record.id.toString().includes(terminoBusqueda.toLowerCase())  ||
+            (typeof record.dose === 'string' && record.dose.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
+            record.duration.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+            record.amount.toString().includes(terminoBusqueda.toLowerCase()) ||
+            record.observations.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+            record.idregistroclinico?.clinical_Record_Data?.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+            record.idproducto?.name?.toLowerCase().includes(terminoBusqueda.toLowerCase())
+        );
+    });
 
     return (
         <>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }} >
-        <Menu_veterinario/>
+        <MenuVeterinario nombre={nombre} />
         <div style={{ display: 'flex', flexGrow: 1 }}>
         <div>
             <Navbar/>
@@ -163,14 +186,14 @@ function CrudFormulaMedica() {
                     </div>
                     <br/>
                     <div className={StylesTabla.DivInpuctsearch}>
-                        <input className={StylesTabla.Inpuctsearch} type="search" placeholder="Buscar" />
+                    <input className={StylesTabla.Inpuctsearch} type="search" placeholder="Buscar" value={terminoBusqueda} onChange={manejarCambioBusqueda} />
                         <i className="bi bi-search-heart" style={{ color: '#56208c', position: 'absolute', top: '10px', right: '1rem', fontSize: '1.2rem' }}></i>
                     </div>
                 </section>
             </div>
             <div className={StylesTabla.tablebody}>
                 <table className="table table-striped table-hover">
-                    <thead>
+                    <thead className={StylesTabla.tablethead} >
                         <tr>
                             <th style={{ textAlign: "center" }}>ID</th>
                             <th style={{ textAlign: "center" }}>Dosis</th>
@@ -183,7 +206,7 @@ function CrudFormulaMedica() {
                         </tr>
                     </thead>
                     <tbody>
-                        {clinicalRecords.map(record => (
+                        {FormulaMFiltrada.map(record => (
                                 <tr key={record.id}>
                                 <td style={{ textAlign: "center" }}>{record.id}</td>
                                 <td style={{ textAlign: "center" }}>{record.dose}</td>

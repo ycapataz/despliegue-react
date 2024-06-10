@@ -23,7 +23,7 @@ function Menu() {
                         <li><NavLink exact to="/" activeClassName="active">Inicio</NavLink></li>
                         <li><NavLink to="/nosotros" activeClassName="active">¿Quienes somos?</NavLink></li>
                         <li><NavLink to="/servicios" activeClassName="active">Servicios</NavLink></li>
-                        <li><NavLink to="/red-de-atencion" activeClassName="active">Red de atencion</NavLink></li>
+                        {/* <li><NavLink to="/red-de-atencion" activeClassName="active">Red de atencion</NavLink></li> */}
                         <li><NavLink to="/contacto" activeClassName="active">Contactenos</NavLink></li>
                     </ul>
                 </nav>

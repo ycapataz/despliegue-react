@@ -23,22 +23,22 @@ return (
     <>  
     <Menu />
         <br /><br />
-            {/* se agrega la barra de busqueda con la clase src */}
+            {/* se agrega la barra de búsqueda con la clase src */}
             <div className="box">
                 <input type="text" name="search" placeholder="Buscar lo que deseas" className="src" autoComplete="off" />
             </div>
-            {/* se agrega el boton de iniciar sesion con la clase boton */}
+            {/* se agrega el boton de iniciar sesión con la clase botón */}
             <div className="boton">
                 {/* <a href="../HTML/iniciosesion.html"><input className="btn" type="submit" value="Iniciar sesion" /></a> */}
-                <NavLink to="/iniciosesion" activeClassName="active"><input className={menustyle.btn} style={{width:'150px', height: '50px', borderRadius: '30px', outline: 'none',border:'none', backgroundColor:'#56208c', color:'white' }} type="submit" value="Iniciar sesion" /></NavLink>
+                <NavLink to="/iniciosesion" activeClassName="active"><input className={menustyle.btn} style={{width:'150px', height: '50px', borderRadius: '30px', outline: 'none',border:'none', backgroundColor:'#56208c', color:'white' }} type="submit" value="Colaboradores" /></NavLink>
             </div>
             {/* se agrega el boton de registrarse con la clase boton1 */}
             <div className="boton1">
                 {/* a los dos botones se les asigna una misma clase porque tienen las mismas propiedades */}
-                <NavLink to="/registrarse" activeClassName="active"><input className={menustyle.btn} style={{width:'150px', height: '50px', borderRadius: '30px',outline: 'none',border:'none', backgroundColor:'#56208c',color:'white' }} type="submit" value="Registrate" /></NavLink>
+                {/* <NavLink to="/registrarse" activeClassName="active"><input className={menustyle.btn} style={{width:'150px', height: '50px', borderRadius: '30px',outline: 'none',border:'none', backgroundColor:'#56208c',color:'white' }} type="submit" value="Regístrate" /></NavLink> */}
             </div>
         <center>
-            <br /><br /><br /><br />
+            <br /><br />
             <div className="carrusel">
                 {/*Este div es el contenedor principal del carrusel y tiene la clase "carrusel".*/}
                 <div className="control_interno">
@@ -121,7 +121,7 @@ return (
                 </figure>
                 <div className="contenido-card">
                     <h3>Gatos</h3>
-                    <p>DOCUMENTAL: La Guia Maxima de LOS GATOS Discovery Channel</p>
+                    <p>DOCUMENTAL: La Guía Máxima de LOS GATOS Discovery Channel</p>
                     <a href="https://youtu.be/YpXrH6t6th8">Ver más</a>
                 </div>
             </div>
@@ -131,7 +131,7 @@ return (
                 </figure>
                 <div className="contenido-card">
                     <h3>Cuida su dieta</h3>
-                    <p>Somos lo que comemos, tambien aplica para nuestras mascotas.</p>
+                    <p>Somos lo que comemos, también aplica para nuestras mascotas.</p>
                     <a href="https://laika.com.co">Ver más</a>
                 </div>
             </div>

@@ -50,7 +50,7 @@ function Modulo() {
                         la selección de la fecha y hora de la cita.
                     </p>
                     {/*Se crea un enlace*/}
-                    <li><NavLink to="/Clientes" activeClassName="active">Agendamiento</NavLink></li>
+                    {/* <li><NavLink to="/Clientes" activeClassName="active">Agendamiento</NavLink></li> */}
                 </div>
             </div>
             {/*se crea una clase cardd que contendra la imagen e informacion de la segunda tarjeta (MISION)*/}
@@ -69,7 +69,7 @@ function Modulo() {
                         detallado de su estado de salud a lo largo del tiempo.
                     </p>
                     {/*Se crea un enlace*/}
-                    <li><NavLink to="/Fomula_Medica" activeClassName="active">Historias Clinicas</NavLink></li>
+                    {/* <li><NavLink to="/Fomula_Medica" activeClassName="active">Historias Clinicas</NavLink></li> */}
                 </div>
             </div>
             {/*se crea una clase cardd que contendra la imagen e informacion de la tercera tarjeta (VISION)*/}
@@ -89,7 +89,7 @@ function Modulo() {
                         salida de productos, y la dispensación de productos a los pacientes.
                     </p>
                     {/*Se crea un enlace*/}
-                    <li><NavLink to="/Proveedor" activeClassName="active">Inventario</NavLink></li>
+                    {/* <li><NavLink to="/Proveedor" activeClassName="active">Inventario</NavLink></li> */}
                 </div>
             </div>
         </div>
