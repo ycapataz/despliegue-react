@@ -156,6 +156,7 @@ function Crud_Proveedor() {
                         <input className={StylesTabla.Inpuctsearch} type="search" placeholder="Buscar" />
                         <i className="bi bi-search-heart" style={{ color: '#56208c', position: 'absolute', top: '10px', right: '1rem', fontSize: '1.2rem' }}></i>
                     </div>
+                    <br/>
                 </section>
                 <br/><br/>
             </div>

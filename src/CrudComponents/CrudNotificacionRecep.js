@@ -1,16 +1,15 @@
 import React, { useContext, useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import StylesTabla from '../assets/css/avg_encabezado.module.scss';//Estilos de la tabla.
-import MenuVeterinario from '../components/Menu_veterinario';//Se importa el menu del veterinario.
+import MenuRecepcionista from '../components/Menu_recepcionista';//Se importa el menu del veterinario.
 import Swal from 'sweetalert2'; //Se importan  sweetalert2 para manejar alertas.
-import Navbar from "../components/Navbar_V";//Se importa navbar veterinario.
+import Navbar from "../components/Navbar";//Se importa navbar veterinario.
 import IncomeService from '../services/IncomeService';//Se importa el servicio necesario
 import UserContext from '../context/UserContext'; //Se importa el Usercontext para traer el id del usuario que a iniciado sesión.
 import SelectedIngresoContext from '../context/SelectedIngresoContext';
 
 function CrudNotifiicacionesV() {
     const [Ingresos, setIngreso] = useState([]);//Constante donde se guarda todos los ingresos.
-    const [IngresoId, setIngresoId] = useState([]);
     const [terminoBusqueda, setTerminoBusqueda] = useState('');//Variable constante donde se establecen los términos de busqueda
     const { user } = useContext(UserContext);//almacena en una constante user el UserContext
     const idEmpleado = user ? user.id : null;//Se extraer el id del veterinario
@@ -26,19 +25,10 @@ function CrudNotifiicacionesV() {
             console.error('Error al obtener los ingresos:', error);
         }
     };
-    const IngresosId = async () => {
-        try {
-        const response = await IncomeService.getIdIncomes(!SelectedIngresoContext);
-        setIngresoId(response.data.data);
-        } catch (error) {
-            console.error('Error al obtener los ingresos:', error);
-        }
-    };
 {/*---------------------------------------------------------------------------------------------------------------------------------------------*/}
 
 useEffect(() => {
     Notificaciones();
-    IngresosId();
 },[]);
 
 //Funcion para traer la fecha actual.
@@ -68,16 +58,16 @@ const manejarCambioBusqueda = (e) => {
     const fechaActual = obtenerFechaActual();
     const horaActual = obtenerHoraActual();
 
-    const estadoingreso = 1;
+    const estadoingreso = 5;
 
     // Filtrar los ingresos según el ID del empleado y el término de búsqueda
     const ingresosFiltrados = Ingresos.filter(ingreso =>
-        ingreso.idcita?.idempleado?.id === idEmpleado &&
         ingreso.date === fechaActual &&
-        ingreso.idestadoingreso.id === estadoingreso && (
+        ingreso.idestadoingreso.id === estadoingreso &&(
             ingreso.id.toString().includes(terminoBusqueda) ||
             ingreso.hour.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
             ingreso.date.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+            ingreso.idcita?.idempleado?.name?.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
             ingreso.idcita?.idmascota?.idcliente?.dni?.toString().includes(terminoBusqueda.toLowerCase()) ||
             ingreso.idcita?.idmascota?.idcliente?.name?.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
             ingreso.idcita?.idmascota?.name?.toLowerCase().includes(terminoBusqueda.toLowerCase())
@@ -90,10 +80,14 @@ const manejarCambioBusqueda = (e) => {
             await IncomeService.updateIncomes(ingresoSeleccionado.data.data.id, {
                 date: ingresoSeleccionado.data.data.date,
                 hour: ingresoSeleccionado.data.data.hour,
-                idestadoingreso: { id: 6 },
+                idestadoingreso: { id: 1 },
             });
-            setSelectedIngresoId(id);
-            navigate('/registroClinico');
+            Notificaciones();//actualiza la tabla.
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'Paciente ingresado.',
+            });
         } catch (error) {
             console.error('Error al actualizar el estado del ingreso:', error);
         }
@@ -103,7 +97,7 @@ const manejarCambioBusqueda = (e) => {
         <>
 {/*--------------------------------------Tabla donde se muestra todo----------------------------------------*/}
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }} >
-        <MenuVeterinario/>
+        <MenuRecepcionista/>
         <div style={{ display: 'flex', flexGrow: 1 }}>
         <div>
             <Navbar/>
@@ -111,7 +105,7 @@ const manejarCambioBusqueda = (e) => {
         <div className={StylesTabla.containerTable}>
             <div className={StylesTabla.TableHeader}>
                 <section className="table__header">
-                    <h1 className={StylesTabla.NombreTable}>Notificación ingreso</h1>
+                    <h1 className={StylesTabla.NombreTable}>Ingresos mascotas</h1>
                     <br/>
                     <div className={StylesTabla.DivInpuctsearch}>
                         <input className={StylesTabla.Inpuctsearch} type="search" placeholder="Buscar" value={terminoBusqueda} onChange={manejarCambioBusqueda} />
@@ -126,10 +120,10 @@ const manejarCambioBusqueda = (e) => {
                             <th style={{ textAlign: "center" }}>ID</th>
                             <th style={{ textAlign: "center" }}>Hora ingreso</th>
                             <th style={{ textAlign: "center" }}>Fecha ingreso</th>
+                            <th style={{ textAlign: "center" }}>Veterinario</th>
                             <th style={{ textAlign: "center" }}>Cedula Propietario</th>
                             <th style={{ textAlign: "center" }}>Nombre Propietario</th>
                             <th style={{ textAlign: "center" }}>Nombre Mascota</th>
-                            <th style={{ textAlign: "center" }}>solicitud ingreso</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -138,6 +132,7 @@ const manejarCambioBusqueda = (e) => {
                                             <td style={{ textAlign: "center" }}>{ingreso.id}</td>
                                             <td style={{ textAlign: "center" }}>{ingreso.hour}</td>
                                             <td style={{ textAlign: "center" }}>{ingreso.date}</td>
+                                            <td style={{ textAlign: "center" }}>{ingreso.idcita.idempleado.name}</td>
                                             <td style={{ textAlign: "center" }}>{ingreso.idcita.idmascota.idcliente.dni}</td>
                                             <td style={{ textAlign: "center" }}>{ingreso.idcita.idmascota.idcliente.name}</td>
                                             <td style={{ textAlign: "center" }}>{ingreso.idcita.idmascota.name}</td>

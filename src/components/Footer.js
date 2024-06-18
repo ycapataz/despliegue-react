@@ -22,7 +22,7 @@ function Footer() {
                         <ul>
                             <li><NavLink to="/nosotros" activeClassName="active">¿Quienes somos?</NavLink></li>
                             <li><NavLink to="/servicios" activeClassName="active">Servicios</NavLink></li>
-                            <li><NavLink to="/red-de-atencion" activeClassName="active">Red de atencion</NavLink></li>
+                            {/* <li><NavLink to="/red-de-atencion" activeClassName="active">Red de atencion</NavLink></li> */}
                             <li><NavLink to="/mapa_del_sitio" activeClassName="active">Mapa de sitio</NavLink></li>
                         </ul>
                     </div>
@@ -43,7 +43,7 @@ function Footer() {
                             <br />
                             <li>Correo</li>
                             <br />
-                            <li>proyectosena318@gmail.com </li>
+                            <li>vpetsoft@gmail.com</li>
                         </ul>
                     </div>
                     <div className="maps">

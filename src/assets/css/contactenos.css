@@ -88,18 +88,18 @@
 }
 
 /* Estilo de los mensajes de error */
-.formulario_input-error {
-    display: none;
+.error-message {
     color: red;
-    font-size: 14px;
-    margin-top: 5px;
+    font-size: 0.875em;
+    margin-top: 0.25em;
 }
-.form-input.valid {
-    border-color: green;
-}
-.form-input.invalid {
+
+.form-input.error,
+.form-textarea.error,
+.lista.error {
     border-color: red;
 }
+
 /* Mostrar mensaje de error cuando el campo es inválido */
 .campo input:invalid + .formulario_input-error {
     display: block;
@@ -119,4 +119,31 @@
 }
 .contraseña2_error{
     display: none;
+}
+
+/* estilos del ckeck de tratamiento de datos*/
+
+.checkbox-label {
+    font-size: 1.2rem; /* Ajusta el tamaño de la fuente según sea necesario */
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    color: #C4FD96;
+}
+
+.checkbox-input {
+    width: 1.2rem; /* Ajusta el tamaño del checkbox */
+    height: 1.2rem; /* Ajusta el tamaño del checkbox */
+    margin-right: 0.5rem; /* Espacio entre el checkbox y el texto */
+}
+
+
+.checkbox-input:checked::after {
+    content: '';
+    display: block;
+    width: 0.5rem; /* Tamaño del indicador de verificación */
+    height: 1rem; /* Tamaño del indicador de verificación */
+    border: solid white;
+    border-width: 0 0.2rem 0.2rem 0;
+    transform: rotate(45deg);
 }

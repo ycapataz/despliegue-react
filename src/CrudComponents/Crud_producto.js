@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState,useContext,useEffect } from 'react';
 import axios from 'axios';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Modal, Form, Button} from 'react-bootstrap';
@@ -6,10 +6,19 @@ import Navbar from "../components/Navbar_almacenista";
 import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import ProductService from '../services/ProductService';
 import Menu_almacenista from '../components/Menu_almacenista';
+import Swal from 'sweetalert2';
+import SelectedIngresoContext from '../context/SelectedIngresoContext';
+
+import { useNavigate } from 'react-router-dom';
+import UserContext from '../context/UserContext';
+
+import { Formik, Field, ErrorMessage } from 'formik';
 
 function Crud_Prducto() {
     const [products, setProducts] = useState([]);
     const [error, setError] = useState(null);
+    const { user } = useContext(UserContext);
+    const navigate = useNavigate();
     const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
     const [mostrarModalGuardar, setMostrarModalGuardar] = useState(false);
     const [datosFormularioEdicion, setDatosFormularioEdicion] = useState({ id: '', name: '', expiration: '', amount: '', batch: '', category:'', provider: '', state: '' });
@@ -17,7 +26,11 @@ function Crud_Prducto() {
     const [categorias, setCategorias] = useState([]);
     const [estados, setEstados] = useState([]);
     const [proveedores, setProveedores] = useState([]);
+    const [terminoBusqueda, setTerminoBusqueda] = useState('');
 
+    const handleChangeBusqueda = (event) => {
+        setTerminoBusqueda(event.target.value);
+    };
     useEffect(() => {
         fetchData();
     }, []);
@@ -48,6 +61,11 @@ function Crud_Prducto() {
     
     const cerrarModalGuardar = () =>{
         setMostrarModalGuardar(false);
+        Swal.fire({
+            icon: 'info',
+            title: 'Cancelado',
+            text: 'Producto cancelado.'
+        });
     };
 
     const abrirModalEdicion = (producto) => {
@@ -67,25 +85,29 @@ function Crud_Prducto() {
 
     const cerrarModalEdicion = () => {
         setMostrarModalEdicion(false);
+        Swal.fire({
+            icon: 'info',
+            title: 'Cancelado',
+            text: 'Producto cancelado.'
+        });
     };
-
-    //Funcion para Guardar
-    const handleGuardarProducto = async () => {
+    
+    const handleGuardarProducto = async (values) => {
         try {
             // Obtener el ID de la categoria seleccionada
-            const idCategoria = categorias.find(categoria => categoria.name === datosFormularioEdicion.category)?.id;
-            
-            // Obtener el ID del estado seleccionada
-            const idProveedor = proveedores.find(proveedor => proveedor.name === datosFormularioEdicion.provider)?.id;
-            
-            // Obtener el ID del estado seleccionada
-            const idEstado = estados.find(estado => estado.name === datosFormularioEdicion.state)?.id;
+            const idCategoria = categorias.find(categoria => categoria.name === values.category)?.id;
+
+            // Obtener el ID del proveedor seleccionado
+            const idProveedor = proveedores.find(proveedor => proveedor.name === values.provider)?.id;
+
+            // Obtener el ID del estado seleccionado
+            const idEstado = estados.find(estado => estado.name === values.state)?.id;
 
             const response = await ProductService.createProduct({
-                name: datosFormularioEdicion.name,
-                expiration: datosFormularioEdicion.expiration,
-                amount: datosFormularioEdicion.amount,
-                batch: datosFormularioEdicion.batch,
+                name: values.name,
+                expiration: values.expiration,
+                amount: values.amount,
+                batch: values.batch,
                 idcategoria: {
                     id: idCategoria
                 },
@@ -95,57 +117,132 @@ function Crud_Prducto() {
                 idestado: {
                     id: idEstado
                 }
-                
             });
+
             console.log('Respuesta de la API:', response.data);
             fetchData(); // Actualiza la tabla
             cerrarModalGuardar(); // Cierra el modal
             // Limpiar los datos del formulario
-            setDatosFormularioEdicion({ id: '', name: '', expiration: '', amount: '', batch: '', category:'', provider: '', state: '' });
+            setDatosFormularioEdicion({ id: '', name: '', expiration: '', amount: '', batch: '', category: '', provider: '', state: '' });
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'El producto se ha guardado correctamente.',
+            });
         } catch (error) {
             console.error('Error al guardar el producto:', error);
-            // Manejar el error
-        }
-    };    
-
-    //Funcion de actualizar
-    const handleActualizarProducto = async (datosProducto) => {
-        try {
-            console.log('Datos del producto a actualizar:', datosProducto);
-
-            // Obtener el ID de la mascota seleccionada
-            const idCategoria = categorias.find(categoria => categoria.name === datosProducto.category)?.id;
-            
-            // Obtener el ID de la especialidad seleccionada
-            const idProveedor = proveedores.find(proveedor => proveedor.name === datosProducto.provider)?.id;
-
-            // Obtener el ID de la especialidad seleccionada
-            const idEstado = estados.find(estado => estado.name === datosProducto.state)?.id;
-
-            const response = await ProductService.updateProduct(datosProducto.id, {
-                name: datosProducto.name,
-                expiration: datosProducto.expiration,
-                amount: datosProducto.amount,
-                batch: datosProducto.batch,
-                idcategoria: {
-                    id: idCategoria
-                },
-                idproveedor: {
-                    id: idProveedor
-                },
-                idestado: {
-                    id: idEstado
-                }
+            Swal.fire({
+                icon: 'error',
+                title: '¡Error!',
+                text: error.message || 'Hubo un error al guardar el producto.',
             });
-            console.log('Respuesta de la API:', response.data);
-            fetchData();//Actualiza la tabla
-            cerrarModalEdicion();//Cierra el modal o ventana emergente
-
-        } catch (error) {
-            console.error('Error al actualizar el producto:', error);
-            // Manejar el error
         }
-    };      
+    };
+     //Funcion de actualizar
+        const handleActualizarProducto = async (values) => {
+            try {
+                console.log('Datos del producto a actualizar:', values);
+    
+                // Obtener el ID de la mascota seleccionada
+                const idCategoria = categorias.find(categoria => categoria.name === values.category)?.id;
+                
+                // Obtener el ID de la especialidad seleccionada
+                const idProveedor = proveedores.find(proveedor => proveedor.name === values.provider)?.id;
+    
+                // Obtener el ID de la especialidad seleccionada
+                const idEstado = estados.find(estado => estado.name === values.state)?.id;
+    
+                const response = await ProductService.updateProduct(values.id, {
+                    name: values.name,
+                    expiration: values.expiration,
+                    amount: values.amount,
+                    batch: values.batch,
+                    idcategoria: {
+                        id: idCategoria
+                    },
+                    idproveedor: {
+                        id: idProveedor
+                    },
+                    idestado: {
+                        id: idEstado
+                    }
+                });
+                console.log('Respuesta de la API:', response.data);
+                fetchData();//Actualiza la tabla
+                cerrarModalEdicion();//Cierra el modal o ventana emergente
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'El producto se ha actualizado correctamente.',
+                });
+    
+            } catch (error) {
+                console.error('Error al actualizar el producto:', error);
+                // Manejar el error
+                Swal.fire({
+                    icon: 'error',
+                    title: '¡Error!',
+                    text: error.message || 'Hubo un error al guardar el producto.',
+                });
+            }
+        };
+
+    //Funcion para Guardar
+    const validateForm = (values) => {
+        const errors = {};
+        // Validar nombre.
+        if (!values.name) {
+            errors.name = 'El nombre es requerido.';
+        } else if (!/^[a-zA-Z\s]*$/.test(values.name)) {
+            errors.name = 'Por favor ingrese un nombre valido';
+        }
+        // Validar fecha de expiración.
+        if (!values.expiration) {
+            errors.expiration = 'La fecha de expiración es requerida.';
+        }
+        // Validar cantidad.
+        if (!values.amount) {
+            errors.amount = 'La cantidad es requerida.';
+        } else if (!/^[1-9][0-9]*$/.test(values.amount)) {
+            errors.amount = 'Por favor ingresar una cantidad válida.';
+        }
+        // Validar lote.
+        if (!values.batch) {
+            errors.batch = 'El lote es requerido.';
+        }
+        // Validar categoría.
+        if (!values.category) {
+            errors.category = 'Selecciona una categoría.';
+        }
+        // Validar proveedor.
+        if (!values.provider) {
+            errors.provider = 'Selecciona un proveedor.';
+        }
+        // Validar estado.
+        if (!values.state) {
+            errors.state = 'Selecciona un estado.';
+        }
+        return errors;
+    };
+        // Función para manejar el cambio en el input de búsqueda
+        const manejarCambioBusqueda = (e) => {
+            setTerminoBusqueda(e.target.value);
+        };
+
+    const productosFiltrados = products.filter(producto => {
+        // Filtrar por ID u otro campo que desees
+        return (
+            producto.id.toString().includes(terminoBusqueda) || // Filtrar por ID
+            (typeof producto.name === 'string' && producto.name.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por nombre
+            (typeof producto.expiration === 'string' && producto.expiration.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por fecha vencimiento
+            (typeof producto.amount === 'string' && producto.amount.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por cantidad
+            (typeof producto.batch === 'string' && producto.batch.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por lote
+            (typeof producto.idcategoria?.name === 'string' && producto.idcategoria?.name.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por categoria
+            (typeof producto.idproveedor?.name === 'string' && producto.idproveedor?.name.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por proveedor
+            (typeof producto.idestado?.name === 'string' && producto.idestado?.name.toLowerCase().includes(terminoBusqueda.toLowerCase())) // Filtrar por proveedor     
+        );
+    }); 
+              
 
     return (
         <>
@@ -165,9 +262,10 @@ function Crud_Prducto() {
                     </div>
                     <br/>
                     <div className={StylesTabla.DivInpuctsearch}>
-                        <input className={StylesTabla.Inpuctsearch} type="search" placeholder="Buscar" />
+                        <input className={StylesTabla.Inpuctsearch} type="search" placeholder="Buscar" value={terminoBusqueda} onChange={manejarCambioBusqueda}/>
                         <i className="bi bi-search-heart" style={{ color: '#56208c', position: 'absolute', top: '10px', right: '1rem', fontSize: '1.2rem' }}></i>
                     </div>
+                    <br/>
                 </section>
             </div>
             <div className={StylesTabla.tablebody}>
@@ -187,7 +285,7 @@ function Crud_Prducto() {
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map(product => (
+                        {productosFiltrados.map(product => (
                             <tr key={product.id}>
                                 <td style={{ textAlign: "center" }}>{product.id}</td>
                                 <td style={{ textAlign: "center" }}>{product.name}</td>
@@ -207,120 +305,294 @@ function Crud_Prducto() {
                     </tbody>
                 </table>
             </div>
-           {/*Modal o ventana emejernte para EDITAR */}
-            <Modal show={mostrarModalEdicion} onHide={cerrarModalEdicion}>
+
+
+                {/*Modal o ventana emejernte para GUARDAR */}
+    <Formik
+        initialValues={{
+            name: '',
+            expiration: '',
+            amount: '',
+            batch: '',
+            category: '',
+            provider: '',
+            state: '',
+        }}
+        validate={validateForm}
+        onSubmit={handleGuardarProducto}
+    >
+        {({ values, errors, touched, handleSubmit, handleChange, handleBlur }) => (
+            <Modal show={mostrarModalGuardar} onHide={cerrarModalGuardar}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Editar Producto</Modal.Title>
+                    <Modal.Title>Generar Producto</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
-                        <Form.Group controlId="formBasicDate">
-                            <Form.Label>Producto</Form.Label>
-                            <Form.Control type="text" value={datosFormularioEdicion.name} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, name: e.target.value })} />
-                        </Form.Group>
+                    <Form onSubmit={handleSubmit}>
                         <Form.Group controlId="formBasicName">
+                            <Form.Label>Producto</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Ingrese el nombre del producto"
+                                name="name"
+                                value={values.name}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={touched.name && !!errors.name}
+                            />
+                            <Form.Control.Feedback type="invalid">{errors.name}</Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group controlId="formBasicExpiration">
                             <Form.Label>Fecha Vencimiento</Form.Label>
-                            <Form.Control type="date" value={datosFormularioEdicion.expiration} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, expiration: e.target.value })} />
+                            <Form.Control
+                                type="date"
+                                placeholder="Ingrese la fecha de vencimiento"
+                                name="expiration"
+                                value={values.expiration}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={touched.expiration && !!errors.expiration}
+                            />
+                            <Form.Control.Feedback type="invalid">{errors.expiration}</Form.Control.Feedback>
                         </Form.Group>
-                        <Form.Group controlId="formBasicHour">
+                        <Form.Group controlId="formBasicAmount">
                             <Form.Label>Cantidad</Form.Label>
-                            <Form.Control type="number" min="1" max="500" value={datosFormularioEdicion.amount} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, amount: e.target.value })} />
+                            <Form.Control
+                                type="number"
+                                min="1"
+                                max="500"
+                                placeholder="Ingrese la cantidad del producto"
+                                name="amount"
+                                value={values.amount}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={touched.amount && !!errors.amount}
+                            />
+                            <Form.Control.Feedback type="invalid">{errors.amount}</Form.Control.Feedback>
                         </Form.Group>
-                        <Form.Group controlId="formBasicHour">
+                        <Form.Group controlId="formBasicBatch">
                             <Form.Label>Lote</Form.Label>
-                            <Form.Control type="number" min="1" value={datosFormularioEdicion.batch} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, batch: e.target.value })} />
+                            <Form.Control
+                                type="number"
+                                min="1"
+                                placeholder="Ingrese el lote del producto"
+                                name="batch"
+                                value={values.batch}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={touched.batch && !!errors.batch}
+                            />
+                            <Form.Control.Feedback type="invalid">{errors.batch}</Form.Control.Feedback>
                         </Form.Group>
-                        <Form.Group controlId="formBasicPetName">
+                        <Form.Group controlId="formBasicCategory">
                             <Form.Label>Categoria</Form.Label>
-                            <Form.Control as="select" value={datosFormularioEdicion.category} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, category: e.target.value })}>
+                            <Form.Control
+                                as="select"
+                                name="category"
+                                value={values.category}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={touched.category && !!errors.category}
+                            >
                                 <option value="">Selecciona una categoria</option>
-                                {categorias.map((categoria, index) => (
-                                    <option key={index} value={categoria.name}>{categoria.name}</option>
+                                {categorias.map((categoria) => (
+                                    <option key={categoria.id} value={categoria.name}>
+                                        {categoria.name}
+                                    </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">{errors.category}</Form.Control.Feedback>
                         </Form.Group>
-                        <Form.Group controlId="formBasicPetName">
+                        <Form.Group controlId="formBasicProvider">
                             <Form.Label>Proveedor</Form.Label>
-                            <Form.Control as="select" value={datosFormularioEdicion.provider} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, provider: e.target.value })}>
+                            <Form.Control
+                                as="select"
+                                name="provider"
+                                value={values.provider}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={touched.provider && !!errors.provider}
+                            >
                                 <option value="">Selecciona un proveedor</option>
-                                {proveedores.map((proveedor, index) => (
-                                    <option key={index} value={proveedor.name}>{proveedor.name}</option>
+                                {proveedores.map((proveedor) => (
+                                    <option key={proveedor.id} value={proveedor.name}>
+                                        {proveedor.name}
+                                    </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">{errors.provider}</Form.Control.Feedback>
                         </Form.Group>
-                        <Form.Group controlId="formBasicSpecialty">
+                        <Form.Group controlId="formBasicState">
                             <Form.Label>Estado</Form.Label>
-                            <Form.Control as="select" value={datosFormularioEdicion.state} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, state: e.target.value })}>
+                            <Form.Control
+                                as="select"
+                                name="state"
+                                value={values.state}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={touched.state && !!errors.state}
+                            >
                                 <option value="">Selecciona un estado</option>
-                                {estados.map((estado, index) => (
-                                    <option key={index} value={estado.name}>{estado.name}</option>
+                                {estados.map((estado) => (
+                                    <option key={estado.id} value={estado.name}>
+                                        {estado.name}
+                                    </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">{errors.state}</Form.Control.Feedback>
                         </Form.Group>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={cerrarModalGuardar}>Cancelar</Button>
+                            <Button variant="primary" type="submit" style={{ background: '#56208c', borderColor: 'transparent' }}>Guardar Producto</Button>
+                        </Modal.Footer>
                     </Form>
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={cerrarModalEdicion}>Cancelar</Button>
-                    <Button variant="primary" style={{background:'#56208c', borderColor: 'transparent'}} onClick={() =>handleActualizarProducto(datosFormularioEdicion)}>Actualizar Producto</Button>
-                </Modal.Footer>
             </Modal>
-                {/*Modal o ventana emejernte para GUARDAR */}
-                <Modal show={mostrarModalGuardar} onHide={cerrarModalGuardar}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Generar Producto</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form>
-                            <Form.Group controlId="formBasicDate">
-                                <Form.Label>Producto</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese el nombre del producto" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, name: e.target.value })} />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicHour">
-                                <Form.Label>Fecha Vencimiento</Form.Label>
-                                <Form.Control type="date" placeholder="Ingrese la fecha de vencimiento" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, expiration: e.target.value })} />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicDate">
-                                <Form.Label>Cantidad</Form.Label>
-                                <Form.Control type="number" min="1" max="500" placeholder="Ingrese la cantidad del producto" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, amount: e.target.value })} />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicHour">
-                                <Form.Label>Lote</Form.Label>
-                                <Form.Control type="number" min="1" placeholder="Ingrese el lote del producto" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, batch: e.target.value })} />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicPetName">
-                                <Form.Label>Categoria</Form.Label>
-                                <Form.Control as="select" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, category: e.target.value })}>
-                                    <option value="">Selecciona una categoria</option>
-                                    {categorias.map((categoria, index) => (
-                                        <option key={index} value={categoria.name}>{categoria.name}</option>
-                                    ))}
-                                </Form.Control>
-                            </Form.Group>
-                            <Form.Group controlId="formBasicPetName">
-                                <Form.Label>Proveedor</Form.Label>
-                                <Form.Control as="select" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, provider: e.target.value })}>
-                                    <option value="">Selecciona un proveedor</option>
-                                    {proveedores.map((proveedor, index) => (
-                                        <option key={index} value={proveedor.name}>{proveedor.name}</option>
-                                    ))}
-                                </Form.Control>
-                            </Form.Group>
-                            <Form.Group controlId="formBasicSpecialty">
-                                <Form.Label>Estado</Form.Label>
-                                <Form.Control as="select" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, state: e.target.value })}>
-                                    <option value="">Selecciona un estado</option>
-                                    {estados.map((estado, index) => (
-                                        <option key={index} value={estado.name}>{estado.name}</option>
-                                    ))}
-                                </Form.Control>
-                            </Form.Group>
-                        </Form>
-                    </Modal.Body>
+        )}
+    </Formik>
+{/*Modal o ventana emergente para EDITAR */}
+<Formik
+    initialValues={{
+        name: datosFormularioEdicion.name || '',
+        expiration: datosFormularioEdicion.expiration || '',
+        amount: datosFormularioEdicion.amount || '',
+        batch: datosFormularioEdicion.batch || '',
+        category: datosFormularioEdicion.category || '',
+        provider: datosFormularioEdicion.provider || '',
+        state: datosFormularioEdicion.state || '',
+    }}
+    validate={validateForm}
+    onSubmit={handleActualizarProducto}
+>
+    {({ values, errors, touched, handleSubmit, handleChange, handleBlur }) => (
+        <Modal show={mostrarModalEdicion} onHide={cerrarModalEdicion}>
+            <Modal.Header closeButton>
+                <Modal.Title>Editar Producto</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form onSubmit={handleSubmit}>
+                    <Form.Group controlId="formBasicName">
+                        <Form.Label>Producto</Form.Label>
+                        <Form.Control
+                            type="text"
+                            placeholder="Ingrese el nombre del producto"
+                            name="name"
+                            value={values.name}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.name && !!errors.name}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors.name}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicExpiration">
+                        <Form.Label>Fecha Vencimiento</Form.Label>
+                        <Form.Control
+                            type="date"
+                            placeholder="Ingrese la fecha de vencimiento"
+                            name="expiration"
+                            value={values.expiration}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.expiration && !!errors.expiration}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors.expiration}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicAmount">
+                        <Form.Label>Cantidad</Form.Label>
+                        <Form.Control
+                            type="number"
+                            min="1"
+                            max="500"
+                            placeholder="Ingrese la cantidad del producto"
+                            name="amount"
+                            value={values.amount}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.amount && !!errors.amount}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors.amount}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicBatch">
+                        <Form.Label>Lote</Form.Label>
+                        <Form.Control
+                            type="number"
+                            min="1"
+                            placeholder="Ingrese el lote del producto"
+                            name="batch"
+                            value={values.batch}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.batch && !!errors.batch}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors.batch}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicCategory">
+                        <Form.Label>Categoria</Form.Label>
+                        <Form.Control
+                            as="select"
+                            name="category"
+                            value={values.category}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.category && !!errors.category}
+                        >
+                            <option value="">Selecciona una categoria</option>
+                            {categorias.map((categoria) => (
+                                <option key={categoria.id} value={categoria.name}>
+                                    {categoria.name}
+                                </option>
+                            ))}
+                        </Form.Control>
+                        <Form.Control.Feedback type="invalid">{errors.category}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicProvider">
+                        <Form.Label>Proveedor</Form.Label>
+                        <Form.Control
+                            as="select"
+                            name="provider"
+                            value={values.provider}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.provider && !!errors.provider}
+                        >
+                            <option value="">Selecciona un proveedor</option>
+                            {proveedores.map((proveedor) => (
+                                <option key={proveedor.id} value={proveedor.name}>
+                                    {proveedor.name}
+                                </option>
+                            ))}
+                        </Form.Control>
+                        <Form.Control.Feedback type="invalid">{errors.provider}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicState">
+                        <Form.Label>Estado</Form.Label>
+                        <Form.Control
+                            as="select"
+                            name="state"
+                            value={values.state}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.state && !!errors.state}
+                        >
+                            <option value="">Selecciona un estado</option>
+                            {estados.map((estado) => (
+                                <option key={estado.id} value={estado.name}>
+                                    {estado.name}
+                                </option>
+                            ))}
+                        </Form.Control>
+                        <Form.Control.Feedback type="invalid">{errors.state}</Form.Control.Feedback>
+                    </Form.Group>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={cerrarModalGuardar}>Cancelar</Button>
-                        <Button variant="primary" style={{background:'#56208c', borderColor: 'transparent'}} onClick={handleGuardarProducto}>Guardar Producto</Button>
+                        <Button variant="secondary" onClick={cerrarModalEdicion}>Cancelar</Button>
+                        <Button variant="primary" type="submit" style={{ background: '#56208c', borderColor: 'transparent' }}>Actualizar Producto</Button>
                     </Modal.Footer>
-                </Modal>
+                </Form>
+            </Modal.Body>
+        </Modal>
+    )}
+</Formik>
+
+
         </div>
         </div>
         </div>

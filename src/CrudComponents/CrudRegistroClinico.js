@@ -13,6 +13,7 @@ import IncomeService from '../services/IncomeService';
 import { useNavigate } from 'react-router-dom';
 import { Formik, Field, ErrorMessage } from 'formik';
 import ReporteExcel from '../components/ReporteExcel';
+import MedicalExamService from '../services/MedicalExamService';
 
 
 
@@ -26,6 +27,7 @@ function CrudRegistroClinico() {
     const [Enfermedades, setEnfermedad] = useState([]);
     const navigate = useNavigate();
     const [Ingresos, setIngresos] = useState([]);
+    const [Examenes, setExamenes] = useState([]);
     const [terminoBusqueda, setTerminoBusqueda] = useState('');
     const handleChangeBusqueda = (event) => {
         setTerminoBusqueda(event.target.value);
@@ -65,8 +67,8 @@ function CrudRegistroClinico() {
         temperature: '',
         idingreso: { date: '' },
         idempleado: { name: '' },
-        idexamenmedico: { exam: '' },
         idmascota:{ name: ''},
+        idexamenmedico:{ exam: '' },
         idenfermedad:{ name: '' }
     });
 
@@ -87,6 +89,15 @@ function CrudRegistroClinico() {
             console.error('Error al obtener los registros clínicos:', error);
         }
     };
+    //Consulta todos los exámenes
+    const fetchExamenes = async () => {
+        try {
+            const response = await MedicalExamService.getAllMedicalExams();
+            setExamenes(response.data.data);
+        } catch (error) {
+            console.error('Error al obtener los Exámenes:', error);
+        }
+    };
 
     const fetchEnfermedad = async () => {
         try {
@@ -101,22 +112,24 @@ function CrudRegistroClinico() {
         try {
             if (!selectedIngresoId) {
                 // No hay ID de ingreso seleccionado, por lo que no se realiza ninguna consulta
+                setIngresos([]);
                 return;
             }
             const response = await IncomeService.getIdIncomes(selectedIngresoId);
-            console.log('Array de ingreso', response);
-            setIngresos(response.data);
+            setIngresos(response.data.data);
         } catch (error) {
             console.error('Error al obtener los ingresos:', error);
+            setIngresos([]);
         }
-    };      
+    };
     
 
     useEffect(() => {
         fetchClinicalRecords();
         fetchEnfermedad();
         fetchIngresos();
-    }, []);
+        fetchExamenes();
+    }, [selectedIngresoId]);
 
     const handleEditRecord = (record) => {
         setEditedRecord(record);
@@ -126,6 +139,7 @@ function CrudRegistroClinico() {
             petName: '',
             specialty: '',
             veterinarian: '',
+            idexamenmedico: editedRecord.idexamenmedico,
             idenfermedad: editedRecord.idenfermedad
         });
         setShowModal(true);
@@ -147,6 +161,7 @@ function CrudRegistroClinico() {
                 temperature: values.temperature,
                 clinical_Record_Data: editedRecord.clinical_Record_Data,
                 observations: values.observations,
+                idexamenmedico: { id: values.idexamenmedico },
                 idenfermedad: { id: values.idenfermedad },
             });
             setShowModal(false);
@@ -177,9 +192,9 @@ function CrudRegistroClinico() {
     //const fechaActual = obtenerFechaActual();
     
 
-    const GuardarRegistroClinico = async (values) => {
+    const GuardarRegistroClinico = async (values, { resetForm }) => {
         try {
-            if (!Ingresos.data || !Ingresos.data.idcita || !Ingresos.data.idcita.idmascota) {
+            if (!Ingresos || !Ingresos.idcita || !Ingresos.idcita.idmascota) {
                 Swal.fire({
                     icon: 'error',
                     title: '¡Error!',
@@ -199,16 +214,22 @@ function CrudRegistroClinico() {
                 observations: values.observations,
                 clinical_Record_Data: new Date().toISOString().split('T')[0],
                 temperature: values.temperature,
-                idingreso: { id: Ingresos.data.id },
+                idingreso: { id: Ingresos.id },
                 idempleado: { id: IdUsuario },
-                idexamenmedico: { id: 1 },
+                idexamenmedico: { id: values.idexamenmedico },
                 idenfermedad: { id: values.idenfermedad },
-                idmascota: { id: Ingresos.data.idcita.idmascota.id },
+                idmascota: { id: Ingresos.idcita.idmascota.id },
             };
             await ClinicalRecordService.createClinicalRecord(registroClinico);
 
+            // Después de guardar, limpiar el estado de Ingresos
+            setIngresos(null);
+
             setshowModalGuardar(false);
             fetchClinicalRecords();
+
+            // Vaciar el formulario
+            resetForm();
 
             Swal.fire({
                 icon: 'success',
@@ -243,6 +264,10 @@ function CrudRegistroClinico() {
         if (!values.observations) {
             errors.observations = 'Las observaciones son requeridas.';
         }
+        // Validar examen.
+        if (!values.idexamenmedico) {
+            errors.idexamenmedico = 'Seleccione un examen.';
+        }
         // Validar enfermedad.
         if (!values.idenfermedad) {
             errors.idenfermedad = 'Selecciona una enfermedad.';
@@ -255,37 +280,57 @@ function CrudRegistroClinico() {
     };
 
     const registrosClinicosFiltrados = clinicalRecords.filter(registro => {
-    // Filtrar por ID u otro campo que desees
-    return (
-        registro.id.toString().includes(terminoBusqueda) || // Filtrar por ID
-        (typeof registro.heart_rate === 'string' && registro.heart_rate.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por frecuencia cardíaca
-        (typeof registro.temperature === 'string' && registro.temperature.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por temperatura
-        (typeof registro.clinical_Record_Data === 'string' && registro.clinical_Record_Data.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por fecha
-        (typeof registro.observations === 'string' && registro.observations.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por observaciones
-        (typeof registro.idingreso?.date === 'string' && registro.idingreso?.date.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por fecha de ingreso
-        (typeof registro.idempleado?.name === 'string' && registro.idempleado?.name.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por nombre del empleado
-        (typeof registro.idexamenmedico?.exam === 'string' && registro.idexamenmedico?.exam.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por examen médico     
-        (typeof registro.idmascota?.idcliente?.dni === 'string' && registro.idmascota?.idcliente?.dni.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por DNI del propietario
-        (typeof registro.idmascota?.name === 'string' && registro.idmascota?.name.toLowerCase().includes(terminoBusqueda.toLowerCase())) || // Filtrar por nombre de la mascota
-        (typeof registro.idenfermedad?.name === 'string' && registro.idenfermedad?.name.toLowerCase().includes(terminoBusqueda.toLowerCase())) // Filtrar por nombre de la enfermedad
-    );
-});    
+        // Filtro general para registros clínicos
+        const filtroGeneral = (
+            registro.id.toString().includes(terminoBusqueda) ||
+            (typeof registro.heart_rate === 'string' && registro.heart_rate.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
+            (typeof registro.temperature === 'string' && registro.temperature.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
+            (typeof registro.clinical_Record_Data === 'string' && registro.clinical_Record_Data.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
+            (typeof registro.observations === 'string' && registro.observations.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
+            (typeof registro.idingreso?.date === 'string' && registro.idingreso?.date.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
+            (typeof registro.idempleado?.name === 'string' && registro.idempleado?.name.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
+            (typeof registro.idexamenmedico?.exam === 'string' && registro.idexamenmedico?.exam.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
+            registro.idmascota?.idcliente?.dni.toString().includes(terminoBusqueda.toLowerCase()) ||
+            (typeof registro.idmascota?.name === 'string' && registro.idmascota?.name.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
+            (typeof registro.idenfermedad?.name === 'string' && registro.idenfermedad?.name.toLowerCase().includes(terminoBusqueda.toLowerCase()))
+        );
+    
+        if (!selectedIngresoId || !Ingresos) {
+            // No se ha seleccionado ningún ingreso o Ingresos es null, devolver el filtro general
+            return filtroGeneral;
+        }
+    
+        // Filtro específico por ingreso
+        const filtroPorIngreso = (
+            registro.idmascota?.id === Ingresos.idcita?.idmascota?.id &&
+            (
+                registro.id.toString().includes(terminoBusqueda) ||
+                registro.hour.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+                registro.date.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+                registro.idcita?.idmascota?.idcliente?.dni?.toString().includes(terminoBusqueda.toLowerCase()) ||
+                registro.idcita?.idmascota?.idcliente?.name?.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+                registro.idcita?.idmascota?.name?.toLowerCase().includes(terminoBusqueda.toLowerCase())
+            )
+        );
+    
+        // Devolver el resultado basado en si se ha seleccionado un ingreso o no
+        return filtroPorIngreso;
+    });    
 
+    const [dni, setDni] = useState('');
+    const [modalIsOpen, setModalIsOpen] = useState(false);
 
-const [dni, setDni] = useState('');
-  const [modalIsOpen, setModalIsOpen] = useState(false);
+    const inpuc = (event) => {
+        setDni(event.target.value);
+    };
 
-  const inpuc = (event) => {
-    setDni(event.target.value);
-  };
+    const openModal = () => {
+        setModalIsOpen(true);
+    };
 
-  const openModal = () => {
-    setModalIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setModalIsOpen(false);
-  };
+    const closeModal = () => {
+        setModalIsOpen(false);
+    };
     
 
     return (
@@ -361,6 +406,7 @@ const [dni, setDni] = useState('');
                 heart_rate: editedRecord.heart_rate || '',
                 temperature: editedRecord.temperature || '',
                 observations: editedRecord.observations || '',
+                idexamenmedico: editedRecord.idexamenmedico?.id || '',
                 idenfermedad: editedRecord.idenfermedad?.id || '',
             }}
             validate={validateForm}
@@ -412,6 +458,23 @@ const [dni, setDni] = useState('');
                                     isInvalid={touched.observations && !!errors.observations}
                                 />
                                 <Form.Control.Feedback type="invalid">{errors.observations}</Form.Control.Feedback>
+                            </Form.Group>
+                            <Form.Group controlId="formBasicExamen">
+                                <Form.Label>Examen</Form.Label>
+                                <Form.Control
+                                    as="select"
+                                    name="idexamenmedico"
+                                    value={values.idexamenmedico}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    isInvalid={touched.idexamenmedico && !!errors.idexamenmedico}
+                                >
+                                    <option value="">Selecciona un examen</option>
+                                    {Examenes.map(examenes => (
+                                        <option key={examenes.id} value={examenes.id}>{examenes.exam}</option>
+                                    ))}
+                                </Form.Control>
+                                <Form.Control.Feedback type="invalid">{errors.idexamenmedico}</Form.Control.Feedback>
                             </Form.Group>
                             <Form.Group controlId="formBasicMacota">
                                 <Form.Label>Enfermedades</Form.Label>
@@ -494,6 +557,23 @@ const [dni, setDni] = useState('');
                         isInvalid={touched.observations && !!errors.observations}
                     />
                     <Form.Control.Feedback type="invalid">{errors.observations}</Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group controlId="formBasicExamen">
+                    <Form.Label>Examen</Form.Label>
+                    <Form.Control
+                        as="select"
+                        name="idexamenmedico"
+                        value={values.idexamenmedico}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        isInvalid={touched.idexamenmedico && !!errors.idexamenmedico}
+                    >
+                        <option value="">Selecciona un examen</option>
+                        {Examenes.map(examenes => (
+                            <option key={examenes.id} value={examenes.id}>{examenes.exam}</option>
+                        ))}
+                    </Form.Control>
+                    <Form.Control.Feedback type="invalid">{errors.idexamenmedico}</Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group controlId="formBasicMacota">
                     <Form.Label>Enfermedades</Form.Label>

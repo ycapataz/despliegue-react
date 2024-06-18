@@ -7,7 +7,14 @@
     font-family: arial, helvetica; /*tipo de letra*/
     color: #56208C; /*color letra*/
 }
+a.active {
+    text-decoration: none;
+}
+a {
+    text-decoration: none;
+}
 nav {
+    position: relative;
     /*nav es lo que contiene todo el menu*/
     background: #C3F294; /*color fondo del menu*/
     height: 80px; /*alto del menu*/
@@ -19,6 +26,7 @@ nav {
     padding: 0px 20px; /*espacio que hay arriba y abajo del logo para centrarlo*/
     display: flex; /*permite acomodar de manera flexible*/
     align-items: center; 
+    text-decoration: none;
 }
 .logo{
     /*se modifica el tamaño del logo*/
@@ -41,6 +49,8 @@ nav ul li a{
     font-size: 18px; /*tamaño de las letras*/
     padding: 7px 13px; /*espacio arriba abajo y a los lados*/
     border-radius: 3px; 
+    text-decoration: none;
+    color: #56208C;
 }
 li a:hover {
     /*se accede a la clase active para darle diseño a los elementos del menu*/
@@ -115,62 +125,3 @@ input.src:hover {
     top: 11%; /*se le da el espacio entre arriba y abajo*/
     left: 50%; /*se le da el espacio entre izquierda y derecha*/
 }
-/*diseño del responsive*/
-@media (max-width: 1050px) /*para tamaño maximo del dispotivo*/ {
-    /*accedemos a la clase donde se encuentra el logo y el nombre que ira en el menu*/
-    .enlace{
-        padding-left: 20px; /*para que se mueva hacia la izquierda el logo*/
-    }
-    nav ul li a{
-        font-size: 16px; /*tamaño de las letras*/
-    }
-}
-@media (max-width: 1050px) /*para tamaño maximo del dispotivo*/ {
-    /*se accede a la clase del icono de font awesome para el menu*/
-    .checkbtn {
-        display: block; /*para que se muestre el icono de font awesome*/
-    }
-    ul {
-        /*se accede a la lista*/
-        /*se configura para que se vea el menu con el icono*/
-        position: fixed; 
-        width: 100%; /*ancho del menu*/
-        height: 100vh; /*altura del menu*/
-        background: #C4FD96; /*color del fondo del menu*/
-        top: 80px; /*para que se siga viendo el menu y el icono*/
-        left: -100%; /*para que no se vea si no se hace clic en l icono*/
-        z-index: 2;
-        text-align: center; /*centrar texto*/
-        transition: all .5s; /*transicion de la animacion*/
-    }
-    nav ul li {
-        /*se accede a los elementos de la lista*/
-        display: block; 
-        margin: 50px 0; /*margen hacia arriba y abajo y a los lados*/
-        line-height: 30px; /*espacio para cada uno de los elementos*/
-    }
-    nav ul li a {
-        font-size: 20px; /*se modifica el tamaño de letra de los elementos de la lista*/
-    }
-    li a:hover, li a.active {
-    /*se accede a la clase active para darle diseño a los elementos del menu*/
-    /*hover es para darle diseño cuando se apunta con el mouse y es una seudoclase*/
-        background: none; /*que no tenga color de fondo*/
-        color: #f2f2f2; /*que tenga color las letras*/
-    }
-    /*cuando el check este activado, se muestra*/
-    #check:checked ~ ul {
-        left:0; /*se permite mostrar el menu*/
-    }
-    .boton {
-        left: -100%; /*para que no se vea si no se hace clic en l icono*/
-    }
-    .boton1 {
-        left: -100%; /*para que no se vea si no se hace clic en l icono*/
-    }
-    .box {
-        left: -100%; /*para que no se vea si no se hace clic en l icono*/
-    }
-}
-
-

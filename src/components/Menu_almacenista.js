@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import style from '../assets/css/avg_encabezado.module.scss';
 import logo1 from '../assets/images/logo1.png';
-import almacenista from '../assets/images/almacenista.jpg';
+import almacenista from '../assets/images/icon-user.jpg';
 import 'bootstrap/scss/bootstrap.scss';
 import UserContext from '../context/UserContext';
 

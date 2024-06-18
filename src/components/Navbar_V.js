@@ -23,7 +23,7 @@ function Navbar() {
         e.preventDefault(); // Evita la navegación inmediata
     
         Swal.fire({
-            title: 'Deseas cerra sesión',
+            title: 'Deseas cerrar sesión',
             //text: "",
             icon: 'warning',
             showCancelButton: true,
@@ -51,11 +51,11 @@ function Navbar() {
     return (
         <div className={styleNavL.sidebar}>
             <ul className={styleNavL.navUl}>
-            <li className={styleNavL.navIl}>
+                {/* <li className={styleNavL.navIl}>
                     <NavLink to='/' exact className='px-1 w-100 d-inline-bock py-2' activeClassName="active"><FaIcons.FaClinicMedical className='me-3' />Inicio</NavLink>
-                </li>
+                </li> */}
                 <li className={styleNavL.navIl}>
-                    <NavLink to='/notificacion' exact className='px-1 w-100 d-inline-bock py-2' activeClassName="active"><FaIcons.FaFolderOpen className='me-3' />Ingresos</NavLink>
+                    <NavLink to='/notificacion' exact className='px-1 w-100 d-inline-bock py-2' activeClassName="active"><FaIcons.FaClinicMedical className='me-3' />Ingresos</NavLink>
                 </li>
                 <li className={styleNavL.navIl}>
                     <NavLink to='/registroClinico' className='px-1 w-100 d-inline-bock py-2'><FaIcons.FaFolderOpen className='me-3' />Registro Clinico</NavLink>

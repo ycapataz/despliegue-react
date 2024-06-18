@@ -43,6 +43,15 @@
     /*se accede al parrafo de la informacion*/
     line-height: 1.5; /*para que cada linea de parrafo tenga un espacio mas grande*/
     font-size: 16px; /*tamaño de las letras*/
+    text-transform: lowercase;
+}
+.p-modulo{
+    text-transform: initial;
+    text-align: justify;
+}
+p::first-letter {
+    /* Convierte la primera letra a mayúscula */
+    text-transform: uppercase;
 }
 .cardd .contenidoo h3{
     /*se accede ala titulo de cada una de las 3 tarjetas*/

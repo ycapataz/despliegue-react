@@ -15,8 +15,11 @@ import CrudFormulaMedica from './CrudComponents/CrudFormulaMedica';
 import CrudProveedor from './CrudComponents/Crud_proveedor';
 import { UserProvider } from './context/UserContext';
 import Notificacionesve from './CrudComponents/CrudNotifiicacionesV';
+import NotificacionesRecep from './CrudComponents/CrudNotificacionRecep';
 import { SelectedIngresoProvider } from './context/SelectedIngresoContext';
+import CrudEmpleado from './CrudComponents/Crud_empleado';
 import ProtectedRoute from './routes/ProtectedRoute';
+import CrudMascota from './CrudComponents/Crud_mascota';
 
 function App() {
   return (
@@ -26,6 +29,8 @@ function App() {
           <Router>
             <div className="App">
               <Routes>
+
+                //URL publicas
                 <Route path="/" element={<Home />} />
                 <Route path="/nosotros" element={<Nosotros />} />
                 <Route path="/servicios" element={<Modulo />} />
@@ -34,10 +39,37 @@ function App() {
                 <Route path="/iniciosesion" element={<IniciarSesion />} />
                 <Route path="/registrarse" element={<Registrarse />} />
                 <Route path="/mapa_del_sitio" element={<MapaSitio />} />
-                <Route path="/cita" element={<CrudCitas />} />
-                <Route path="/clientes" element={<CrudClientes />} />
-                <Route path="/producto" element={<CrudProducto />} />
-                <Route path="/proveedor" element={<CrudProveedor />} />
+
+                //Modulo protegido gestión de inventario.
+                <Route
+                  path="/producto" 
+                  element={<ProtectedRoute component={CrudProducto} />} 
+                />
+                <Route
+                  path="/proveedor" 
+                  element={<ProtectedRoute component={CrudProveedor} />}
+                />
+                
+                
+                //Modulo protegido gestión de agendamiento e ingreso.
+                <Route 
+                  path="/notificacionR" 
+                  element={<ProtectedRoute component={NotificacionesRecep} />} />
+                <Route 
+                  path="/mascota" 
+                  element={<ProtectedRoute component={CrudMascota} />} />
+                <Route 
+                  path="/clientes" 
+                  element={<ProtectedRoute component={CrudClientes} />} />
+                <Route 
+                  path="/cita" 
+                  element={<ProtectedRoute component={CrudCitas} />} 
+                  />
+                <Route 
+                  path="/empleado" 
+                  element={<ProtectedRoute component={CrudEmpleado} />} />    
+
+                //Modulo protegido registro clínico
                 <Route 
                   path="/registroClinico" 
                   element={<ProtectedRoute component={CrudRegistroClinico} />} 

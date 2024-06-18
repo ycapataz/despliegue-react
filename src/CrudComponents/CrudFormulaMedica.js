@@ -8,11 +8,12 @@ import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import MedicalFormulaService from '../services/MedicalFormulaService';
 import ProductService from '../services/ProductService';
 import MenuVeterinario from '../components/Menu_veterinario';
+import { Formik, Field, ErrorMessage } from 'formik';
 
 function CrudFormulaMedica() {
     const location = useLocation();
     const { nombre } = location.state || {};
-    const [clinicalRecords, setClinicalRecords] = useState([]);
+    const [FormulasMedicas, setFormulasMedicas] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [productos, setProductos] = useState([]);
@@ -29,36 +30,35 @@ function CrudFormulaMedica() {
     });
     const [editedRecord, setEditedRecord] = useState({
         id: '',
-        heart_rate: '',
-        observations: '',
-        clinical_Record_Data: '',
+        dose: '',
+        duration: '',
+        amount: '',
         temperature: '',
-        idingreso: { date: '' },
-        idempleado: { name: '' },
-        idexamenmedico: { exam: '' }
+        observations: '',
+        idproducto: { name: '' }
     });
+
+    const fetchFormulasMedicas = async () => {
+        try {
+            const response = await MedicalFormulaService.getAllMedicalFormula();
+            setFormulasMedicas(response.data.data);
+        } catch (error) {
+            console.error('Error al obtener los registros clínicos:', error);
+        }
+    };
+    const fetchProducts = async () => {
+        try {
+            const response = await ProductService.getAllProducts();
+             // Agregar esta línea para verificar los datos recibidos
+            setProductos(response.data.DATA);
+        } catch (error) {
+            console.error('Error al obtener los productos:', error);
+        }
+    };
 
 
     useEffect(() => {
-        const fetchClinicalRecords = async () => {
-            try {
-                const response = await MedicalFormulaService.getAllMedicalFormula();
-                setClinicalRecords(response.data.data);
-            } catch (error) {
-                console.error('Error al obtener los registros clínicos:', error);
-            }
-        };
-        const fetchProducts = async () => {
-            try {
-                const response = await ProductService.getAllProducts();
-                 // Agregar esta línea para verificar los datos recibidos
-                setProductos(response.data.DATA);
-            } catch (error) {
-                console.error('Error al obtener los productos:', error);
-            }
-        };
-
-        fetchClinicalRecords();
+        fetchFormulasMedicas();
         fetchProducts();
     }, []);
 
@@ -70,7 +70,7 @@ function CrudFormulaMedica() {
             amount: record.amount,
             observations: record.observations,
             idproducto: editedRecord.idproducto
-        });
+            });
         setShowModal(true);
     };   
 
@@ -89,24 +89,55 @@ function CrudFormulaMedica() {
 
     const handleCloseCreateModal = () => {
         setShowCreateModal(false);
+        Swal.fire({
+            icon: 'info',
+            title: 'Cancelado',
+            text: 'la formula medica ha sido cancelada.'
+        });
     };
 
-    const Editar = async () => {
+    const Crear = async (values, { resetForm }) => {
         try {
-            const IdProducto = parseInt(editedRecord.idproducto);
+            await MedicalFormulaService.createMedicalFormula({
+                dose: values.dose,
+                duration: values.duration,
+                amount: values.amount,
+                observations: values.observations,
+                idproducto: { id: values.idproducto },
+                idregistroclinico: { id: 1 }
+            });
+            setShowCreateModal(false);
+            // Actualizar lista de fórmulas médicas después de la creación
+            fetchFormulasMedicas();
+            // Vaciar el formulario
+            resetForm();
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'La fórmula médica se creó correctamente.'
+            });
+        } catch (error) {
+            console.error('Error al crear la fórmula médica:', error);
+            Swal.fire({
+                icon: 'error',
+                title: '¡Error!',
+                text: 'Hubo un error al crear la fórmula médica.'
+            });
+        }
+    };
+    
+    const Editar = async (values) => {
+        try {
             await MedicalFormulaService.updateMedicalFormula(editedRecord.id, {
-                
-
-                dose: editedRecord.dose,
-                duration: editedRecord.duration,
-                amount: editedRecord.amount,
-                observations: editedRecord.observations,
-                idproducto: { id: IdProducto }
+                dose: values.dose,
+                duration: values.duration,
+                amount: values.amount,
+                observations: values.observations,
+                idproducto: { id: values.idproducto },
             });
             setShowModal(false);
-            // Recargar las fórmulas médicas después de guardar los cambios
-            const response = await MedicalFormulaService.getAllMedicalFormula();
-            setClinicalRecords(response.data.data);
+            // Actualizar lista de fórmulas médicas después de la edición
+            fetchFormulasMedicas();
             Swal.fire({
                 icon: 'success',
                 title: '¡Éxito!',
@@ -120,43 +151,44 @@ function CrudFormulaMedica() {
                 text: 'Hubo un error al guardar los cambios.'
             });
         }
-    };   
-    
-    const Crear = async () => {
-        try {
-            // Obtener el ID del producto seleccionado del estado editedRecord
-            const idProducto = parseInt(CrearRecord.idproducto);
-            
-            // ID predeterminado para el registro clínico
-            const idRegistroClinicoPredeterminado = 1;
-        
-            // Crear la fórmula médica con los datos proporcionados
-            await MedicalFormulaService.createMedicalFormula({
-                dose: CrearRecord.dose,
-                duration: CrearRecord.duration,
-                amount: CrearRecord.amount,
-                observations: CrearRecord.observations,
-                idproducto: { id: idProducto },
-                idregistroclinico: { id: idRegistroClinicoPredeterminado } // Establecer el valor predeterminado
-            });
-        
-            // Cerrar el modal de creación
-            setShowCreateModal(false);
-        
-            // Actualizar la lista de fórmulas médicas
-            const response = await MedicalFormulaService.getAllMedicalFormula();
-            setClinicalRecords(response.data.data);
-        } catch (error) {
-            console.error('Error al crear la fórmula médica:', error);
-            // Manejar el error
+    };        
+
+    const validateForm = (values) => {
+        const errors = {};
+        // Validar dosis
+        if (!values.dose) {
+            errors.dose = 'La dosis es requerida.';
+        } else if (!/^[1-9][0-9]*$/.test(values.dose)) {
+            errors.dose = 'Por favor ingresar una dosis válida.';
         }
+        // Validar duración
+        if (!values.duration) {
+            errors.duration = 'La duración es requerida.';
+        }
+        // Validar cantidad
+        if (!values.amount) {
+            errors.amount = 'La cantidad es requerida.';
+        } else if (!/^[1-9][0-9]*$/.test(values.amount)) {
+            errors.amount = 'Por favor ingresar una cantidad válida.';
+        }
+        // Validar observaciones
+        if (!values.observations) {
+            errors.observations = 'Las observaciones son requeridas.';
+        }
+        // Validar producto
+        if (!values.idproducto) {
+            errors.idproducto = 'Seleccione un producto.';
+        }
+        return errors;
     };
+    
+
     // Función para manejar el cambio en el input de búsqueda
     const manejarCambioBusqueda = (e) => {
         setTerminoBusqueda(e.target.value);
     };
     // Filtrar los registros clínicos según el término de búsqueda
-    const FormulaMFiltrada = clinicalRecords.filter(record => {
+    const FormulaMFiltrada = FormulasMedicas.filter(record => {
         return (
             record.id.toString().includes(terminoBusqueda.toLowerCase())  ||
             (typeof record.dose === 'string' && record.dose.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
@@ -225,122 +257,200 @@ function CrudFormulaMedica() {
                     </tbody>
                 </table>
             </div>
-            {/*Modal o ventana emejernte para EDITAR */}
+            <Formik
+                initialValues={{
+                    dose: editedRecord.dose || '',
+                    duration: editedRecord.duration || '',
+                    amount: editedRecord.amount || '',
+                    observations: editedRecord.observations || '',
+                    idproducto: editedRecord.idproducto?.id || '', // Asumiendo que idproducto es el campo para el producto
+                }}
+                validate={validateForm}
+                onSubmit={Editar}
+                enableReinitialize
+            >
+            {({ values, errors, touched, handleSubmit, handleChange, handleBlur }) => (
             <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Editar Registro Clínico</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
+                <Form onSubmit={handleSubmit}>
+                    <Form.Group controlId="formBasicDose">
+                        <Form.Label>Dosis</Form.Label>
+                        <Form.Control
+                            type="number"
+                            min="1"
+                            name="dose"
+                            value={values.dose}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.dose && !!errors.dose}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors.dose}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicDuration">
+                        <Form.Label>Duración</Form.Label>
+                        <Form.Control
+                            type="text"
+                            name="duration"
+                            value={values.duration}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.duration && !!errors.duration}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors.duration}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicAmount">
+                        <Form.Label>Cantidad</Form.Label>
+                        <Form.Control
+                            type="number"
+                            min="1"
+                            name="amount"
+                            value={values.amount}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.amount && !!errors.amount}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors.amount}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicObservations">
+                        <Form.Label>Notas</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            name="observations"
+                            value={values.observations}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.observations && !!errors.observations}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors.observations}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicProduct">
+                        <Form.Label>Producto</Form.Label>
+                        <Form.Control
+                            as="select"
+                            name="idproducto"
+                            value={values.idproducto}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.idproducto && !!errors.idproducto}
+                        >
+                            <option value="">Selecciona un producto</option>
+                            {productos.map(producto => (
+                                <option key={producto.id} value={producto.id}>{producto.name}</option>
+                            ))}
+                        </Form.Control>
+                        <Form.Control.Feedback type="invalid">{errors.idproducto}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseModal}>Cancelar</Button>
+                        <Button variant="primary" type="submit" style={{ background: '#56208c', borderColor: 'transparent' }}>Guardar Cambios</Button>
+                    </Modal.Footer>
+                </Form>
+            </Modal.Body>
+            </Modal>
+        )}
+        </Formik>
+
+                {/*Modal o ventana emejernte para CREAR */}
+                <Formik
+                    initialValues={{
+                        dose: '',
+                        duration: '',
+                        amount: '',
+                        observations: '',
+                        idproducto: '', // Asumiendo que idproducto es el campo para el producto
+                    }}
+                    validate={validateForm}
+                    onSubmit={Crear}
+                    enableReinitialize
+                >
+                {({ values, errors, touched, handleSubmit, handleChange, handleBlur }) => (
+            <Modal show={showCreateModal} onHide={handleCloseCreateModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Crear Nueva Fórmula Médica</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleSubmit}>
                         <Form.Group controlId="formBasicDose">
                             <Form.Label>Dosis</Form.Label>
                             <Form.Control
                                 type="number"
                                 min="1"
-                                value={editedRecord.dose}
-                                onChange={(e) => setEditedRecord({ ...editedRecord, dose: e.target.value })}
+                                name="dose"
+                                value={values.dose}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={touched.dose && !!errors.dose}
                             />
-                        </Form.Group>
-                        <Form.Group controlId="formBasicDuration">
-                            <Form.Label>Duración</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={editedRecord.duration}
-                                onChange={(e) => setEditedRecord({ ...editedRecord, duration: e.target.value })}
-                            />
-                        </Form.Group>
-                        <Form.Group controlId="formBasicAmount">
-                            <Form.Label>Cantidad</Form.Label>
-                            <Form.Control
-                                type="number"
-                                min="1"
-                                value={editedRecord.amount}
-                                onChange={(e) => setEditedRecord({ ...editedRecord, amount: e.target.value })}
-                            />
-                        </Form.Group>
-                        <Form.Group controlId="formBasicObservations">
-                            <Form.Label>Notas</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                rows={3}
-                                value={editedRecord.observations}
-                                onChange={(e) => setEditedRecord({ ...editedRecord, observations: e.target.value })}
-                            />
-                        </Form.Group>
-                        <Form.Group controlId="formBasicProduct">
-                            <Form.Label>Producto</Form.Label>
-                            <Form.Control as="select" value={editedRecord.idproducto} onChange={(e) => setEditedRecord({ ...editedRecord, idproducto: e.target.value })}>
-                                <option value="">Selecciona un producto</option>
-                                {productos.map(producto => (
-                                    <option key={producto.id} value={producto.id}>{producto.name}</option>
-                                ))}
-                            </Form.Control>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseModal}>Cancelar</Button>
-                    <Button variant="primary" style={{ background: '#56208c', borderColor: 'transparent' }} onClick={Editar}>Guardar Cambios</Button>
-                </Modal.Footer>
-            </Modal>
-                {/*Modal o ventana emejernte para CREAR */}
-                <Modal show={showCreateModal} onHide={handleCloseCreateModal}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Crear Nueva Fórmula Médica</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form>
-                            <Form.Group controlId="formBasicDose">
-                                <Form.Label>Dosis</Form.Label>
-                                <Form.Control
-                                    type="number"
-                                    min="1"
-                                    
-                                    onChange={(e) => setCrearRecord({ ...CrearRecord, dose: e.target.value })}
-                                />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicDuration">
-                                <Form.Label>Duración</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    
-                                    onChange={(e) => setCrearRecord({ ...CrearRecord, duration: e.target.value })}
-                                />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicAmount">
-                                <Form.Label>Cantidad</Form.Label>
-                                <Form.Control
-                                    type="number"
-                                    min="1"
-                                    
-                                    onChange={(e) => setCrearRecord({ ...CrearRecord, amount: e.target.value })}
-                                />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicObservations">
-                                <Form.Label>Notas</Form.Label>
-                                <Form.Control
-                                    as="textarea"
-                                    rows={3}
-                                    
-                                    onChange={(e) => setCrearRecord({ ...CrearRecord, observations: e.target.value })}
-                                />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicProduct">
-                                <Form.Label>Producto</Form.Label>
-                                <Form.Control as="select" value={CrearRecord.idproducto} onChange={(e) => setCrearRecord({ ...CrearRecord, idproducto: e.target.value })}>
-                                    <option value="">Selecciona un producto</option>
-                                    {productos.map(producto => (
-                                        <option key={producto.id} value={producto.id}>{producto.name}</option>
-                                    ))}
-                                </Form.Control>
-                            </Form.Group>
-                        </Form>
-                    </Modal.Body>
+                        <Form.Control.Feedback type="invalid">{errors.dose}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicDuration">
+                        <Form.Label>Duración</Form.Label>
+                        <Form.Control
+                            type="text"
+                            name="duration"
+                            value={values.duration}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.duration && !!errors.duration}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors.duration}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicAmount">
+                        <Form.Label>Cantidad</Form.Label>
+                        <Form.Control
+                            type="number"
+                            min="1"
+                            name="amount"
+                            value={values.amount}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.amount && !!errors.amount}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors.amount}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicObservations">
+                        <Form.Label>Notas</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            name="observations"
+                            value={values.observations}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.observations && !!errors.observations}
+                        />
+                        <Form.Control.Feedback type="invalid">{errors.observations}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicProduct">
+                        <Form.Label>Producto</Form.Label>
+                        <Form.Control
+                            as="select"
+                            name="idproducto"
+                            value={values.idproducto}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            isInvalid={touched.idproducto && !!errors.idproducto}
+                        >
+                            <option value="">Selecciona un producto</option>
+                            {productos.map(producto => (
+                                <option key={producto.id} value={producto.id}>{producto.name}</option>
+                            ))}
+                        </Form.Control>
+                        <Form.Control.Feedback type="invalid">{errors.idproducto}</Form.Control.Feedback>
+                    </Form.Group>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={handleCloseCreateModal}>Cancelar</Button>
-                        <Button variant="primary" style={{ background: '#56208c', borderColor: 'transparent' }} onClick={Crear}>Crear Fórmula</Button>
+                        <Button variant="primary" type="submit" style={{ background: '#56208c', borderColor: 'transparent' }}>Crear Fórmula</Button>
                     </Modal.Footer>
-                </Modal>
+                </Form>
+            </Modal.Body>
+            </Modal>
+        )}
+        </Formik>
         </div>
         </div>
         </div>
