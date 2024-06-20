@@ -11,12 +11,12 @@ import Swal from 'sweetalert2';
 // Esquema de validación con Yup y Regex
 const validationSchema = Yup.object().shape({
     name: Yup.string()
-        .matches(/^[a-zA-ZñÑ]+(?:\s[a-zA-ZñÑ]+){0,2}$/, 'Esto no es un nombre.')
+        .matches(/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]+(?:\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]+){0,2}$/, 'Esto no es un nombre.')
         .min(3, 'Debe tener al menos 3 caracteres')
         .max(15, 'Exceso de caracteres, esto no parece un nombre.')
         .required('Campo requerido'),
     lastName: Yup.string()
-        .matches(/^[a-zA-ZñÑ]+(?:\s[a-zA-ZñÑ]+){0,3}$/, 'Esto no es un apellido.')
+        .matches(/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]+(?:\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]+){0,3}$/, 'Esto no es un apellido.')
         .min(3, 'Debe tener al menos 3 caracteres')
         .max(20, 'Exceso de caracteres, esto no parece un apellido.')
         .required('Campo requerido'),
@@ -53,7 +53,7 @@ function Crud_Clientes() {
     const fetchData = async () => {
         try {
             const response = await CustomerService.getAllCustomers();
-            setCustomers(response.data.DATA);
+            setCustomers(response.data.DATA.reverse());
             const ciudades = response.data.DATA.map(cliente => ({ id: cliente.idciudad.id, name: cliente.idciudad.name }));
             const ciudadesUnicas = ciudades.filter((ciudad, index, self) => self.findIndex(m => m.id === ciudad.id) === index);
             setCiudades(ciudadesUnicas);
@@ -128,7 +128,7 @@ function Crud_Clientes() {
             cerrarModalGuardar();
             resetForm();
         } catch (error) {
-            console.error('Error al guardar el propietario:', error);
+            console.error('Error al guardar el cliente:', error);
         } finally {
             setSubmitting(false);
         }
@@ -156,7 +156,7 @@ function Crud_Clientes() {
             fetchData();
             cerrarModalEdicion();
         } catch (error) {
-            console.error('Error al actualizar el propietario:', error);
+            console.error('Error al actualizar el cliente:', error);
         } finally {
             setSubmitting(false);
         }
@@ -193,9 +193,9 @@ function Crud_Clientes() {
                     <div className={StylesTabla.containerTable}>
                         <div className={StylesTabla.TableHeader}>
                             <section className="table__header">
-                                <h1 className={StylesTabla.NombreTable}>Tabla Propietario</h1>
+                                <h1 className={StylesTabla.NombreTable}>Tabla Cliente</h1>
                                 <div>
-                                    <button className={StylesTabla.buttonHeader} onClick={abrirModalGuardar}>Crear Propietario</button>
+                                    <button className={StylesTabla.buttonHeader} onClick={abrirModalGuardar}>Crear cliente</button>
                                 </div>
                                 <br />
                                 <div className={StylesTabla.DivInpuctsearch}>
@@ -206,15 +206,15 @@ function Crud_Clientes() {
                         </div>
                         <div className={StylesTabla.tablebody}>
                             <table className="table table-striped table-hover">
-                                <thead>
+                                <thead className={StylesTabla.tablethead}>
                                     <tr>
                                         <th style={{ textAlign: "center" }}>Id</th>
                                         <th style={{ textAlign: "center" }}>Nombres</th>
                                         <th style={{ textAlign: "center" }}>Apellidos</th>
-                                        <th style={{ textAlign: "center" }}>No Cedula</th>
-                                        <th style={{ textAlign: "center" }}>Telefono</th>
-                                        <th style={{ textAlign: "center" }}>Mail</th>
-                                        <th style={{ textAlign: "center" }}>Direccion</th>
+                                        <th style={{ textAlign: "center" }}>N° Cedula</th>
+                                        <th style={{ textAlign: "center" }}>Teléfono</th>
+                                        <th style={{ textAlign: "center" }}>Correo</th>
+                                        <th style={{ textAlign: "center" }}>Dirección</th>
                                         <th style={{ textAlign: "center" }}>Ciudad</th>
                                         <th style={{ textAlign: "center" }}>Acciones</th>
                                     </tr>
@@ -243,7 +243,7 @@ function Crud_Clientes() {
                         {/* Modal para EDITAR */}
                         <Modal show={mostrarModalEdicion} onHide={cerrarModalEdicion}>
                             <Modal.Header closeButton>
-                                <Modal.Title>Editar Propietario</Modal.Title>
+                                <Modal.Title>Editar Cliente</Modal.Title>
                             </Modal.Header>
                             <Formik
                                 initialValues={datosFormularioEdicion}
@@ -301,7 +301,7 @@ function Crud_Clientes() {
                                             <Button variant="secondary" onClick={cerrarModalEdicion}>
                                                 Cancelar
                                             </Button>
-                                            <Button variant="primary" type="submit" disabled={isSubmitting}>
+                                            <Button variant="primary" type="submit" disabled={isSubmitting} style={{ background: '#56208c', borderColor: 'transparent' }} >
                                                 Guardar Cambios
                                             </Button>
                                         </Modal.Footer>
@@ -313,7 +313,7 @@ function Crud_Clientes() {
                         {/* Modal para GUARDAR */}
                         <Modal show={mostrarModalGuardar} onHide={cerrarModalGuardar}>
                             <Modal.Header closeButton>
-                                <Modal.Title>Guardar Propietario</Modal.Title>
+                                <Modal.Title>Guardar Cliente</Modal.Title>
                             </Modal.Header>
                             <Formik
                                 initialValues={{
@@ -352,7 +352,7 @@ function Crud_Clientes() {
                                                 <ErrorMessage name="phone" component="div" className="text-danger" />
                                             </Form.Group>
                                             <Form.Group controlId="formBasicMail">
-                                                <Form.Label>Mail</Form.Label>
+                                                <Form.Label>Correo</Form.Label>
                                                 <Field className="form-control" type="email" name="mail" />
                                                 <ErrorMessage name="mail" component="div" className="text-danger" />
                                             </Form.Group>
@@ -378,7 +378,7 @@ function Crud_Clientes() {
                                             <Button variant="secondary" onClick={cerrarModalGuardar}>
                                                 Cancelar
                                             </Button>
-                                            <Button variant="primary" type="submit" disabled={isSubmitting}>
+                                            <Button variant="primary" type="submit" disabled={isSubmitting} style={{ background: '#56208c', borderColor: 'transparent' }} >
                                                 Guardar
                                             </Button>
                                         </Modal.Footer>

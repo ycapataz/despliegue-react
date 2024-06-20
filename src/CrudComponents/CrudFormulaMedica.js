@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Modal, Form, Button} from 'react-bootstrap';
@@ -7,13 +7,16 @@ import Navbar from "../components/Navbar_V";
 import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import MedicalFormulaService from '../services/MedicalFormulaService';
 import ProductService from '../services/ProductService';
+import SelectedRegistroClinicoContext from '../context/SelectedRegistroContext';
 import MenuVeterinario from '../components/Menu_veterinario';
 import { Formik, Field, ErrorMessage } from 'formik';
 
 function CrudFormulaMedica() {
     const location = useLocation();
+    const navigate = useNavigate();
     const { nombre } = location.state || {};
     const [FormulasMedicas, setFormulasMedicas] = useState([]);
+    const { selectedRegistroClinicoId, setSelectedRegistroClinicoId } = useContext(SelectedRegistroClinicoContext);
     const [showModal, setShowModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [productos, setProductos] = useState([]);
@@ -41,7 +44,7 @@ function CrudFormulaMedica() {
     const fetchFormulasMedicas = async () => {
         try {
             const response = await MedicalFormulaService.getAllMedicalFormula();
-            setFormulasMedicas(response.data.data);
+            setFormulasMedicas(response.data.data.reverse());
         } catch (error) {
             console.error('Error al obtener los registros clínicos:', error);
         }
@@ -98,24 +101,44 @@ function CrudFormulaMedica() {
 
     const Crear = async (values, { resetForm }) => {
         try {
+            if (!selectedRegistroClinicoId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '¡Error!',
+                    text: 'Por favor, selecciona un Registro Clinico para continuar.',
+                    confirmButtonText: 'Seleccionar Registro Clinico',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        navigate('/registroClinico');
+                    }
+                });
+                return;
+            }
+
             await MedicalFormulaService.createMedicalFormula({
                 dose: values.dose,
                 duration: values.duration,
                 amount: values.amount,
                 observations: values.observations,
                 idproducto: { id: values.idproducto },
-                idregistroclinico: { id: 1 }
+                idregistroclinico: { id: selectedRegistroClinicoId }
             });
-            setShowCreateModal(false);
+
+            // Después de guardar, limpiar el ID de registro clínico seleccionado
+            setSelectedRegistroClinicoId(null);
+
             // Actualizar lista de fórmulas médicas después de la creación
             fetchFormulasMedicas();
+
             // Vaciar el formulario
             resetForm();
+
             Swal.fire({
                 icon: 'success',
                 title: '¡Éxito!',
                 text: 'La fórmula médica se creó correctamente.'
             });
+
         } catch (error) {
             console.error('Error al crear la fórmula médica:', error);
             Swal.fire({

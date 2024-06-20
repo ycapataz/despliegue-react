@@ -27,7 +27,7 @@ function Navbar_almacenista() {
             //text: "",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
+            confirmButtonColor: '#56208C',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Sí, salir',
             cancelButtonText: 'Cancelar'

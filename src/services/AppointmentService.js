@@ -18,6 +18,10 @@ class AppointmentService {
     updateAppointment(id, updatedData) {
         return axios.put(`${Url_appointment}/update/${id}`, updatedData);
     }
+    
+    deleteAppointment(id) {
+        return axios.delete(`${Url_appointment}/delete/${id}`);
+    }
 }
 
 export default new AppointmentService();

@@ -18,6 +18,10 @@ class IncomeService {
     updateIncomes(id, updatedData) {
         return axios.put(`${Url_Income}/update/${id}`, updatedData);
     }
+
+    deleteIncome(id) {
+        return axios.delete(`${Url_Income}/delete/${id}`);
+    }
 }
 
 export default new IncomeService();

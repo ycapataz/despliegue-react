@@ -9,6 +9,7 @@ import MenuVeterinario from '../components/Menu_veterinario';
 import DiseaseService from '../services/DiseaseService';
 import UserContext from '../context/UserContext';
 import SelectedIngresoContext from '../context/SelectedIngresoContext';
+import SelectedRegistroClinicoContext from '../context/SelectedRegistroContext';
 import IncomeService from '../services/IncomeService';
 import { useNavigate } from 'react-router-dom';
 import { Formik, Field, ErrorMessage } from 'formik';
@@ -28,6 +29,7 @@ function CrudRegistroClinico() {
     const navigate = useNavigate();
     const [Ingresos, setIngresos] = useState([]);
     const [Examenes, setExamenes] = useState([]);
+    const { setSelectedRegistroClinicoId } = useContext(SelectedRegistroClinicoContext);
     const [terminoBusqueda, setTerminoBusqueda] = useState('');
     const handleChangeBusqueda = (event) => {
         setTerminoBusqueda(event.target.value);
@@ -84,7 +86,7 @@ function CrudRegistroClinico() {
     const fetchClinicalRecords = async () => {
         try {
             const response = await ClinicalRecordService.getAllClinicalRecords();
-            setClinicalRecords(response.data);
+            setClinicalRecords(response.data.reverse());
         } catch (error) {
             console.error('Error al obtener los registros clínicos:', error);
         }
@@ -253,12 +255,16 @@ function CrudRegistroClinico() {
             errors.heart_rate = 'La frecuencia cardíaca es requerida.';
         } else if (!/^[1-9][0-9]*$/.test(values.heart_rate)) {
             errors.heart_rate = 'Por favor ingresar una frecuencia cardíaca válida.';
+        } else if (parseInt(values.heart_rate, 10) > 600) {
+            errors.heart_rate = 'La frecuencia cardíaca máxima permitida es 600.';
         }
         // Validar temperatura.
         if (!values.temperature) {
             errors.temperature = 'La temperatura es requerida.';
         } else if (!/^[1-9][0-9]*$/.test(values.temperature)) {
             errors.temperature = 'Por favor ingresar una temperatura válida.';
+        } else if (parseInt(values.temperature, 10) > 44) {
+            errors.temperature = 'La temperatura máxima permitida es 44.';
         }
         // Validar observaciones.
         if (!values.observations) {
@@ -281,7 +287,7 @@ function CrudRegistroClinico() {
 
     const registrosClinicosFiltrados = clinicalRecords.filter(registro => {
         // Filtro general para registros clínicos
-        const filtroGeneral = (
+        const filtroGeneral = ( 
             registro.id.toString().includes(terminoBusqueda) ||
             (typeof registro.heart_rate === 'string' && registro.heart_rate.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
             (typeof registro.temperature === 'string' && registro.temperature.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
@@ -331,7 +337,11 @@ function CrudRegistroClinico() {
     const closeModal = () => {
         setModalIsOpen(false);
     };
-    
+
+    const handleSeleccionarRegistroClinic = async (id) => {
+        setSelectedRegistroClinicoId(id);
+        navigate('/Fomula_Medica');
+    };
 
     return (
         <>
@@ -370,7 +380,7 @@ function CrudRegistroClinico() {
                             <th style={{ textAlign: "center" }}>Fecha Ingreso</th>
                             <th style={{ textAlign: "center" }}>Creado por</th>
                             <th style={{ textAlign: "center" }}>Examen</th>
-                            <th style={{ textAlign: "center" }}>Propietario Mascota</th>
+                            <th style={{ textAlign: "center" }}>N° dueño mascota</th>
                             <th style={{ textAlign: "center" }}>Mascotas</th>
                             <th style={{ textAlign: "center" }}>Enfermedad</th>
                             <th style={{ textAlign: "center" }}>Acciones</th>
@@ -391,8 +401,8 @@ function CrudRegistroClinico() {
                                 <td style={{ textAlign: "center" }}>{record.idmascota.name}</td>
                                 <td style={{ textAlign: "center" }}>{record.idenfermedad.name}</td>
                                 <td style={{ textAlign: "center" }}>
-                                    <button type="button" className="btn btn-primary btn-sm" style={{ height: '3rem', width: '3rem', background: 'transparent', boxShadow: 'none', borderColor: 'transparent' }} onClick={() => handleEditRecord(record)} >
-                                        <i className="bi bi-pencil-square" style={{ fontSize: '2rem', textAlign: "center", cursor: 'pointer' }}></i>
+                                    <button type="button" className="btn btn-primary btn-sm" style={{ height: '3rem', width: '3rem', background: 'transparent', boxShadow: 'none', borderColor: 'transparent' }} onClick={() => handleSeleccionarRegistroClinic(record.id)} >
+                                        <i className="bi bi-journal-bookmark-fill" style={{ fontSize: '2rem', textAlign: "center", cursor: 'pointer' }}></i>
                                     </button>
                                 </td>
                             </tr>
@@ -400,108 +410,6 @@ function CrudRegistroClinico() {
                     </tbody>
                 </table>
             </div>
-            {/*Modal o ventana emergente para EDITAR */}
-            <Formik
-            initialValues={{
-                heart_rate: editedRecord.heart_rate || '',
-                temperature: editedRecord.temperature || '',
-                observations: editedRecord.observations || '',
-                idexamenmedico: editedRecord.idexamenmedico?.id || '',
-                idenfermedad: editedRecord.idenfermedad?.id || '',
-            }}
-            validate={validateForm}
-            onSubmit={Editar}
-            enableReinitialize
-        >
-            {({ values, errors, touched, handleSubmit, handleChange, handleBlur }) => (
-                <Modal show={showModal} onHide={setShowModal}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Editar Registro Clínico</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form onSubmit={handleSubmit}>
-                            <Form.Group controlId="formBasicHeartRate">
-                                <Form.Label>Frecuencia Cardíaca</Form.Label>
-                                <Form.Control
-                                    type="number"
-                                    min="1"
-                                    name="heart_rate"
-                                    value={values.heart_rate}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    isInvalid={touched.heart_rate && !!errors.heart_rate}
-                                />
-                                <Form.Control.Feedback type="invalid">{errors.heart_rate}</Form.Control.Feedback>
-                            </Form.Group>
-                            <Form.Group controlId="formBasicTemperature">
-                                <Form.Label>Temperatura</Form.Label>
-                                <Form.Control
-                                    type="number"
-                                    min="1"
-                                    name="temperature"
-                                    value={values.temperature}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    isInvalid={touched.temperature && !!errors.temperature}
-                                />
-                                <Form.Control.Feedback type="invalid">{errors.temperature}</Form.Control.Feedback>
-                            </Form.Group>
-                            <Form.Group controlId="formBasicObservations">
-                                <Form.Label>Observaciones</Form.Label>
-                                <Form.Control
-                                    as="textarea"
-                                    rows={3}
-                                    name="observations"
-                                    value={values.observations}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    isInvalid={touched.observations && !!errors.observations}
-                                />
-                                <Form.Control.Feedback type="invalid">{errors.observations}</Form.Control.Feedback>
-                            </Form.Group>
-                            <Form.Group controlId="formBasicExamen">
-                                <Form.Label>Examen</Form.Label>
-                                <Form.Control
-                                    as="select"
-                                    name="idexamenmedico"
-                                    value={values.idexamenmedico}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    isInvalid={touched.idexamenmedico && !!errors.idexamenmedico}
-                                >
-                                    <option value="">Selecciona un examen</option>
-                                    {Examenes.map(examenes => (
-                                        <option key={examenes.id} value={examenes.id}>{examenes.exam}</option>
-                                    ))}
-                                </Form.Control>
-                                <Form.Control.Feedback type="invalid">{errors.idexamenmedico}</Form.Control.Feedback>
-                            </Form.Group>
-                            <Form.Group controlId="formBasicMacota">
-                                <Form.Label>Enfermedades</Form.Label>
-                                <Form.Control
-                                    as="select"
-                                    name="idenfermedad"
-                                    value={values.idenfermedad}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    isInvalid={touched.idenfermedad && !!errors.idenfermedad}
-                                >
-                                    <option value="">Selecciona una enfermedad</option>
-                                    {Enfermedades.map(enfermedad => (
-                                        <option key={enfermedad.id} value={enfermedad.id}>{enfermedad.name}</option>
-                                    ))}
-                                </Form.Control>
-                                <Form.Control.Feedback type="invalid">{errors.idenfermedad}</Form.Control.Feedback>
-                            </Form.Group>
-                            <Modal.Footer>
-                                <Button variant="secondary" onClick={handleCloseModal}>Cancelar</Button>
-                                <Button variant="primary" type="submit" style={{ background: '#56208c', borderColor: 'transparent' }}>Guardar Cambios</Button>
-                            </Modal.Footer>
-                        </Form>
-                    </Modal.Body>
-                </Modal>
-            )}
-        </Formik>
         <Formik
             initialValues={{
                 heart_rate: '',

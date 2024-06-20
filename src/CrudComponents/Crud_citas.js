@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 import Navbar from "../components/Navbar";
 import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import AppointmentService from '../services/AppointmentService';
+import PetService from '../services/PetService';
 import IncomeService from '../services/IncomeService';
 import Menu_recepcionista from '../components/Menu_recepcionista';
 import Swal from 'sweetalert2';
@@ -18,17 +19,19 @@ function Crud_Citas() {
     const [mostrarModalGuardar, setMostrarModalGuardar] = useState(false);
     const [datosFormularioEdicion, setDatosFormularioEdicion] = useState({ id: '', date: '', hour: '', petName: '', specialty: '', veterinarian: '' });
     const [mascotas, setMascotas] = useState([]);
+    const [mascotasSelect, setMascotasSelect] = useState([]);
     const [especialidades, setEspecialidades] = useState([]);
     const [veterinarios, setVeterinarios] = useState([]);
 
     useEffect(() => {
         fetchData();
+        fetchMascotaSelect();
     }, []);
 
     const fetchData = async () => {
         try {
             const response = await AppointmentService.getAllAppointments();
-            setAppointments(response.data.DATA);
+            setAppointments(response.data.DATA.reverse());
             // Obtener mascotas, especialidades y veterinarios disponibles
             const mascotas = response.data.DATA.map(cita => ({ id: cita.idmascota.id, name: cita.idmascota.name }));
             const especialidades = response.data.DATA.map(cita => ({ id: cita.idespecialidad.id, name: cita.idespecialidad.name }));
@@ -44,6 +47,16 @@ function Crud_Citas() {
             setError(error.message);
         }
     };
+
+    const fetchMascotaSelect = async () => {
+        try {
+            const response = await PetService.getAllPets();
+            console.log("Mascotas del select: ", response)
+            setMascotasSelect(response.data.data);
+        } catch (error) {
+            setError(error.message);
+        }
+    }
 
     const abrirModalGuardar = () => {
         setMostrarModalGuardar(true);
@@ -78,6 +91,52 @@ function Crud_Citas() {
             title: 'Cancelado',
             text: 'Edicion de cita cancelada.'
         });
+    };
+
+    const confirmarEliminarCita = (citaId) => {
+        Swal.fire({
+            title: '¿Estás seguro en cancelar la cita?',
+            text: "¡No podrás revertir esto!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#56208C',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, cancelar!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                eliminarCita(citaId);
+            }
+        });
+    };
+
+    const eliminarCita = async (citaId) => {
+        try {
+             // Consultar todos los ingresos
+            const ingresosResponse = await IncomeService.getAllIncomes();
+            console.log("ingresos",ingresosResponse);
+            const ingresos = ingresosResponse.data.data;
+
+             // Filtrar y eliminar los ingresos relacionados con la cita
+            const ingresosRelacionados = ingresos.filter(ingreso => ingreso.idcita.id === citaId);
+            for (const ingreso of ingresosRelacionados) {
+                await IncomeService.deleteIncome(ingreso.id);
+            }
+            // Eliminar la cita
+            await AppointmentService.deleteAppointment(citaId);
+            fetchData(); // Actualiza la tabla después de eliminar
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'Cita cancelada correctamente.',
+            });
+        } catch (error) {
+            console.error('Error al eliminar la cita:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un problema al cancelar la cita.',
+            });
+        }
     };
     const minDate = new Date().toISOString().slice(0, 10); // Fecha mínima actual
     const maxDate = new Date(new Date().setMonth(new Date().getMonth() + 2)).toISOString().slice(0, 10); // Fecha máxima dentro de dos meses
@@ -169,34 +228,6 @@ function Crud_Citas() {
         }
     };
 
-    // Función de actualizar
-    const handleActualizarCita = async (values, { setSubmitting }) => {
-        try {
-            const idMascota = mascotas.find(mascota => mascota.name === values.petName)?.id;
-            const idEspecialidad = especialidades.find(especialidad => especialidad.name === values.specialty)?.id;
-            const idVeterinario = veterinarios.find(veterinario => veterinario.name === values.veterinarian)?.id;
-
-            const response = await AppointmentService.updateAppointment(values.id, {
-                date: values.date,
-                hour: values.hour,
-                idmascota: { id: idMascota },
-                idespecialidad: { id: idEspecialidad },
-                idempleado: { id: idVeterinario }
-            });
-            fetchData(); // Actualiza la tabla
-            cerrarModalEdicion(); // Cierra el modal
-            Swal.fire({
-                icon: 'success',
-                title: '¡Éxito!',
-                text: 'Los cambios se guardaron correctamente.',
-            });
-        } catch (error) {
-            console.error('Error al actualizar la cita:', error);
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
     return (
         <>
             <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -221,7 +252,7 @@ function Crud_Citas() {
                         </div>
                         <div className={StylesTabla.tablebody}>
                             <table className="table table-striped table-hover">
-                                <thead>
+                                <thead className={StylesTabla.tablethead}>
                                     <tr>
                                         <th style={{ textAlign: "center" }}>Id</th>
                                         <th style={{ textAlign: "center" }}>Fecha cita</th>
@@ -242,8 +273,8 @@ function Crud_Citas() {
                                             <td style={{ textAlign: "center" }}>{appointment.idespecialidad.name}</td>
                                             <td style={{ textAlign: "center" }}>{appointment.idempleado.name}</td>
                                             <td style={{ textAlign: "center" }}>
-                                                <button type="button" className="btn btn-primary btn-sm" style={{ height: '3rem', width: '3rem', background: 'transparent', boxShadow: 'none', borderColor: 'transparent' }} onClick={() => abrirModalEdicion(appointment)}>
-                                                    <i className="bi bi-pencil-square" style={{ fontSize: '2rem', textAlign: "center", cursor: 'pointer' }}></i>
+                                                <button type="button" className="btn btn-primary btn-sm" style={{ height: '3rem', width: '3rem', background: 'transparent', boxShadow: 'none', borderColor: 'transparent' }} onClick={() => confirmarEliminarCita(appointment.id)}>
+                                                    <i className="bi bi-x-circle-fill" style={{ fontSize: '2rem', textAlign: "center", cursor: 'pointer' }}></i>
                                                 </button>
                                             </td>
                                         </tr>
@@ -251,68 +282,6 @@ function Crud_Citas() {
                                 </tbody>
                             </table>
                         </div>
-                        {/* Modal para EDITAR */}
-                        <Modal show={mostrarModalEdicion} onHide={cerrarModalEdicion}>
-                            <Modal.Header closeButton>
-                                <Modal.Title>Editar Cita</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                                <Formik
-                                    initialValues={datosFormularioEdicion}
-                                    validationSchema={validationSchema}
-                                    onSubmit={handleActualizarCita}
-                                >
-                                    {({ isSubmitting }) => (
-                                        <FormikForm>
-                                            <Form.Group controlId="formBasicDate">
-                                                <Form.Label>Fecha cita</Form.Label>
-                                                <Field type="date" name="date" className="form-control" />
-                                                <ErrorMessage name="date" component="div" className="text-danger" />
-                                            </Form.Group>
-                                            <Form.Group controlId="formBasicHour">
-                                                <Form.Label>Hora cita</Form.Label>
-                                                <Field type="time" name="hour" className="form-control" />
-                                                <ErrorMessage name="hour" component="div" className="text-danger" />
-                                            </Form.Group>
-                                            <Form.Group controlId="formBasicPetName">
-                                                <Form.Label>Nombre Mascota</Form.Label>
-                                                <Field as="select" name="petName" className="form-control">
-                                                    <option value="">Selecciona una mascota</option>
-                                                    {mascotas.map((mascota, index) => (
-                                                        <option key={index} value={mascota.name}>{mascota.name}</option>
-                                                    ))}
-                                                </Field>
-                                                <ErrorMessage name="petName" component="div" className="text-danger" />
-                                            </Form.Group>
-                                            <Form.Group controlId="formBasicSpecialty">
-                                                <Form.Label>Especialidad</Form.Label>
-                                                <Field as="select" name="specialty" className="form-control">
-                                                    <option value="">Selecciona una especialidad</option>
-                                                    {especialidades.map((especialidad, index) => (
-                                                        <option key={index} value={especialidad.name}>{especialidad.name}</option>
-                                                    ))}
-                                                </Field>
-                                                <ErrorMessage name="specialty" component="div" className="text-danger" />
-                                            </Form.Group>
-                                            <Form.Group controlId="formBasicVeterinarian">
-                                                <Form.Label>Veterinario</Form.Label>
-                                                <Field as="select" name="veterinarian" className="form-control">
-                                                    <option value="">Selecciona un veterinario</option>
-                                                    {veterinarios.map((veterinario, index) => (
-                                                        <option key={index} value={veterinario.name}>{veterinario.name}</option>
-                                                    ))}
-                                                </Field>
-                                                <ErrorMessage name="veterinarian" component="div" className="text-danger" />
-                                            </Form.Group>
-                                            <Modal.Footer>
-                                                <Button variant="secondary" onClick={cerrarModalEdicion}>Cancelar</Button>
-                                                <Button type="submit" variant="primary" style={{ background: '#56208c', borderColor: 'transparent' }} disabled={isSubmitting}>Guardar Cambios</Button>
-                                            </Modal.Footer>
-                                        </FormikForm>
-                                    )}
-                                </Formik>
-                            </Modal.Body>
-                        </Modal>
                         {/* Modal para GUARDAR */}
                         <Modal show={mostrarModalGuardar} onHide={cerrarModalGuardar}>
                             <Modal.Header closeButton>
@@ -340,8 +309,8 @@ function Crud_Citas() {
                                                 <Form.Label>Nombre Mascota</Form.Label>
                                                 <Field as="select" name="petName" className="form-control">
                                                     <option value="">Selecciona una mascota</option>
-                                                    {mascotas.map((mascota, index) => (
-                                                        <option key={index} value={mascota.name}>{mascota.name}</option>
+                                                    {mascotasSelect.map(mascota => (
+                                                        <option key={mascota.id} value={mascota.id}>{mascota.name}</option>
                                                     ))}
                                                 </Field>
                                                 <ErrorMessage name="petName" component="div" className="text-danger" />

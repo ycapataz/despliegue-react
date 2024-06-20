@@ -248,13 +248,13 @@ function Crud_empleado(){
         // Validar nombre.
         if (!values.name) {
             errors.name = 'El nombre es requerido.';
-        } else if (!/^[a-zA-Z\s]*$/.test(values.name)) {
+        } else if (!/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]+(?:\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]+){0,2}$/.test(values.name)) {
             errors.name = "Por favor ingrese un nombre valido"
         }
 
         if (!values.lastName) {
             errors.lastName = 'El apellido es requerido.';
-        } else if (!/^[a-zA-Z\s]*$/.test(values.lastName)) {
+        } else if (!/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]+(?:\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]+){0,2}$/.test(values.lastName)) {
             errors.name = "Por favor ingrese un apellido valido"
         }
 
@@ -337,19 +337,19 @@ function Crud_empleado(){
     });
     
     const [dni, setDni] = useState('');
-  const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
 
-  const inpuc = (event) => {
-    setDni(event.target.value);
-  };
+    const inpuc = (event) => {
+        setDni(event.target.value);
+    };
 
-  const openModal = () => {
-    setModalIsOpen(true);
-  };
+    const openModal = () => {
+        setModalIsOpen(true);
+    };
 
-  const closeModal = () => {
-    setModalIsOpen(false);
-  };
+    const closeModal = () => {
+        setModalIsOpen(false);
+    };
     
 
     return (
@@ -367,8 +367,6 @@ function Crud_empleado(){
                     <h1 className={StylesTabla.NombreTable}>Empleado</h1>
                     <div>
                         <button className={StylesTabla.buttonHeader} onClick={handleMostrarModal} style={{ marginRight: '10px' }}>Crear Empleado</button>
-                        <button className={StylesTabla.buttonHeader} onClick={openModal} >Reporte</button>
-                        <ReporteExcel dni={dni} modalIsOpen={modalIsOpen} closeModal={closeModal} />
                     </div>
                     <br/>
                     <div className={StylesTabla.DivInpuctsearch}>
@@ -386,10 +384,10 @@ function Crud_empleado(){
                             <th style={{ textAlign: "center" }}>Apellido</th>
                             <th style={{ textAlign: "center" }}>Edad</th>
                             <th style={{ textAlign: "center" }}>Correo</th>
-                            <th style={{ textAlign: "center" }}>Direccion</th>                       
-                            <th style={{ textAlign: "center" }}>Telefono</th>
+                            <th style={{ textAlign: "center" }}>Dirección</th>                       
+                            <th style={{ textAlign: "center" }}>Teléfono</th>
                             <th style={{ textAlign: "center" }}>Fecha Nacimiento</th>
-                            <th style={{ textAlign: "center" }}>Cedula</th>
+                            <th style={{ textAlign: "center" }}>N° Cedula</th>
                             <th style={{ textAlign: "center" }}>Eps</th>
                             <th style={{ textAlign: "center" }}>Cargo</th>
                             <th style={{ textAlign: "center" }}>Especialidad</th>
@@ -499,7 +497,7 @@ function Crud_empleado(){
             <Form.Control.Feedback type="invalid">{errors.mail}</Form.Control.Feedback>
         </Form.Group>
         <Form.Group controlId="formBasicColor">
-            <Form.Label>Direccion</Form.Label>
+            <Form.Label>Dirección</Form.Label>
             <Form.Control
                 type="text"
                 name="address"
@@ -511,7 +509,7 @@ function Crud_empleado(){
             <Form.Control.Feedback type="invalid">{errors.address}</Form.Control.Feedback>
         </Form.Group>
         <Form.Group controlId="formBasicColor">
-            <Form.Label>Telefono</Form.Label>
+            <Form.Label>Teléfono</Form.Label>
             <Form.Control
                 type="number"
                 name="phone"
@@ -536,7 +534,7 @@ function Crud_empleado(){
             <Form.Control.Feedback type="invalid">{errors.birthdayDate}</Form.Control.Feedback>
         </Form.Group>
         <Form.Group controlId="formBasicMicrochip">
-            <Form.Label>Cedula</Form.Label>
+            <Form.Label>N° cedula</Form.Label>
             <Form.Control
                 type="text"
                 name="dni"

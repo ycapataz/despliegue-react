@@ -87,7 +87,7 @@ function Crud_mascota(){
     const fetchPets = async () => {
         try{
             const response = await PetService.getAllPets();
-            setPets(response.data.data);
+            setPets(response.data.data.reverse());
         } catch (error) {
             console.error('Error al obtener las mascotas:', error);
         }
@@ -245,7 +245,7 @@ function Crud_mascota(){
         // Validar nombre.
         if (!values.name) {
             errors.name = 'El nombre es requerido.';
-        } else if (!/^[a-zA-Z\s]*$/.test(values.name)) {
+        } else if (!/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]+(?:\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]+){0,2}$/.test(values.name)) {
             errors.name = "Por favor ingrese un nombre valido"
         }
     
@@ -257,14 +257,26 @@ function Crud_mascota(){
         }
     
         // Validar fecha de nacimiento.
-        if (!values.dateBirth) {
-            errors.dateBirth = 'La fecha de nacimiento es requerida.';
+    if (!values.dateBirth) {
+        errors.dateBirth = 'La fecha de nacimiento es requerida.';
+    } else {
+        const regexDate = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regexDate.test(values.dateBirth)) {
+            errors.dateBirth = 'Formato de fecha inválido (YYYY-MM-DD).';
+        } else {
+            const selectedDate = new Date(values.dateBirth);
+            const currentDate = new Date();
+            const maxPastDate = new Date();
+            maxPastDate.setFullYear(maxPastDate.getFullYear() - 16);
+
+            // Compara la fecha de nacimiento seleccionada con la fecha actual y el límite de 16 años atrás.
+            if (selectedDate >= currentDate) {
+                errors.dateBirth = 'La fecha de nacimiento debe ser anterior a la fecha actual.';
+            }else if (selectedDate <= maxPastDate) {
+                errors.dateBirth = 'La mascota no puede tener más de 16 años de edad.';
+            }
         }
-    
-        // Validar número de microchip.
-        if (!values.number_microchip) {
-            errors.number_microchip = 'El número de microchip es requerido.';
-        }
+    }
     
         // Validar nombre del cliente.
         if (!values.idcliente) {
@@ -308,20 +320,19 @@ const mascotasFiltradas = pets.filter(mascota => {
         );
     });
     const [dni, setDni] = useState('');
-  const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
 
-  const inpuc = (event) => {
-    setDni(event.target.value);
-  };
+    const inpuc = (event) => {
+        setDni(event.target.value);
+    };
 
-  const openModal = () => {
-    setModalIsOpen(true);
-  };
+    const openModal = () => {
+        setModalIsOpen(true);
+    };
 
-  const closeModal = () => {
-    setModalIsOpen(false);
-  };
-    
+    const closeModal = () => {
+        setModalIsOpen(false);
+    };
 
     return (
         <>
@@ -338,8 +349,6 @@ const mascotasFiltradas = pets.filter(mascota => {
                     <h1 className={StylesTabla.NombreTable}>Mascota</h1>
                     <div>
                         <button className={StylesTabla.buttonHeader} onClick={handleMostrarModal} style={{ marginRight: '10px' }}>Crear Mascota</button>
-                        <button className={StylesTabla.buttonHeader} onClick={openModal} >Reporte</button>
-                        <ReporteExcel dni={dni} modalIsOpen={modalIsOpen} closeModal={closeModal} />
                     </div>
                     <br/>
                     <div className={StylesTabla.DivInpuctsearch}>

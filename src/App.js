@@ -17,6 +17,7 @@ import { UserProvider } from './context/UserContext';
 import Notificacionesve from './CrudComponents/CrudNotifiicacionesV';
 import NotificacionesRecep from './CrudComponents/CrudNotificacionRecep';
 import { SelectedIngresoProvider } from './context/SelectedIngresoContext';
+import { SelectedRegistroClinicoProvider } from './context/SelectedRegistroContext';
 import CrudEmpleado from './CrudComponents/Crud_empleado';
 import ProtectedRoute from './routes/ProtectedRoute';
 import CrudMascota from './CrudComponents/Crud_mascota';
@@ -26,6 +27,7 @@ function App() {
     <>
       <UserProvider>
         <SelectedIngresoProvider>
+        <SelectedRegistroClinicoProvider>
           <Router>
             <div className="App">
               <Routes>
@@ -85,6 +87,7 @@ function App() {
               </Routes>
             </div>
           </Router>
+        </SelectedRegistroClinicoProvider>
         </SelectedIngresoProvider>
       </UserProvider>
     </>
