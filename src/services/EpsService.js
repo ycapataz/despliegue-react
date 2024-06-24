@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_eps = 'https://vpetsoft.onrender.com/api/eps';
+const Url_eps = 'https://vpetsoft1.onrender.com/api/eps';
 
 class EpsService {
     getAllEps() {

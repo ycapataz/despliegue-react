@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_pet = 'https://vpetsoft.onrender.com/api/pet';
+const Url_pet = 'https://vpetsoft1.onrender.com/api/pet';
 
 class PetService {
     getAllPets() {

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_category = 'https://vpetsoft.onrender.com/api/categories';
+const Url_category = 'https://vpetsoft1.onrender.com/api/categories';
 
 class CateforyService {
     getAllCategories() {

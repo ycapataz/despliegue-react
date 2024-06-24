@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_Diseases= 'https://vpetsoft.onrender.com/api/diseases';
+const Url_Diseases= 'https://vpetsoft1.onrender.com/api/diseases';
 
 class DiseasesService {
     getAllDiseases() {

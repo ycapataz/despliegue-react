@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_post = 'https://vpetsoft.onrender.com/api/Post';
+const Url_post = 'https://vpetsoft1.onrender.com/api/Post';
 
 class PostService {
     getAllPosts() {

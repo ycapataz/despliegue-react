@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_product = 'https://vpetsoft.onrender.com/api/Product';
+const Url_product = 'https://vpetsoft1.onrender.com/api/Product';
 
 class ProviderService {
     getAllProducts() {

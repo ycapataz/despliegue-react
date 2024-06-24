@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_entry = 'https://vpetsoft.onrender.com/api/RegistrationEntry';
+const Url_entry = 'https://vpetsoft1.onrender.com/api/RegistrationEntry';
 
 class RegistrationEntryService {
     getAllEntries() {

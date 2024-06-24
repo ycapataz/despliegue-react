@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_provider = 'https://vpetsoft.onrender.com/api/Provider';
+const Url_provider = 'https://vpetsoft1.onrender.com/api/Provider';
 
 class ProviderService {
     getAllProviders() {

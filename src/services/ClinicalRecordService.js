@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_clinicalrecords = 'https://vpetsoft.onrender.com/api/clinicalrecords';
+const Url_clinicalrecords = 'https://vpetsoft1.onrender.com/api/clinicalrecords';
 
 class ClinicalRecordService {
     getAllClinicalRecords() {

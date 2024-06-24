@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_city = 'https://vpetsoft.onrender.com/api/city';
+const Url_city = 'https://vpetsoft1.onrender.com/api/city';
 
 class CityService {
     getAllCitys() {

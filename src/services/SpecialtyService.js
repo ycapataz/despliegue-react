@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_specialty = 'https://vpetsoft.onrender.com/api/Specialty';
+const Url_specialty = 'https://vpetsoft1.onrender.com/api/Specialty';
 
 class SpecialtyService {
     getAllSpecialtys() {

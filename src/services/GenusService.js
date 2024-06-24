@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_genus = 'https://vpetsoft.onrender.com/api/PetGenus';
+const Url_genus = 'https://vpetsoft1.onrender.com/api/PetGenus';
 
 class GenusService {
     getAllGenus() {

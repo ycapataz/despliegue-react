@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_breed = 'https://vpetsoft.onrender.com/api/breeds';
+const Url_breed = 'https://vpetsoft1.onrender.com/api/breeds';
 
 class BreedService {
     getAllBreeds() {
