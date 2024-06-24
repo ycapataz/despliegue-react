@@ -112,7 +112,7 @@ function Crud_entradas() {
     const fetchSelectProducto = async () => {
         try {
             const response = await ProductService.getAllProducts();
-            setSlectProducto(response.data);
+            setSlectProducto(response.data.DATA);
         } catch (error) {
             console.log("Error al obtener los productos", error)
         }
@@ -169,7 +169,7 @@ function Crud_entradas() {
     const handleGuardarEntrada = async (values) => {
         try {
             // Obtener el ID de la categoria seleccionada
-            const idProducto = productos.find(producto => producto.name === values.product)?.id;
+            const idProducto = values.product;
 
             const response = await RegistrationEntryService.createEntry({
                 date: new Date().toISOString().split('T')[0],
@@ -288,7 +288,7 @@ function Crud_entradas() {
                     <Field as="select" className="form-control" name="product">
                         <option value="">Seleccionar producto</option>
                         {selectProducto.map(producto => (
-                        <option key={producto.id} value={producto.name}>
+                        <option key={producto.id} value={producto.id}>
                             {producto.name}
                         </option>
                         ))}

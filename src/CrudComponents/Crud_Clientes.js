@@ -109,7 +109,7 @@ function Crud_Clientes() {
 
     const handleGuardarCliente = async (values, { setSubmitting, resetForm }) => {
         try {
-            const idCiudad = ciudades.find(ciudad => ciudad.name === values.city)?.id;
+            const idCiudad = values.city
             const dniExists = customers.some(customer => customer.dni === values.dni);
             if (dniExists) {
                 Swal.fire({
@@ -252,76 +252,6 @@ function Crud_Clientes() {
                                 </tbody>
                             </table>
                         </div>
-                        {/* Modal para EDITAR */}
-                        <Modal show={mostrarModalEdicion} onHide={cerrarModalEdicion}>
-                            <Modal.Header closeButton>
-                                <Modal.Title>Editar Propietario</Modal.Title>
-                            </Modal.Header>
-                            <Formik
-                                initialValues={datosFormularioEdicion}
-                                enableReinitialize={true}
-                                validationSchema={validationSchema}
-                                onSubmit={handleActualizarCliente}
-                            >
-                                {({ isSubmitting }) => (
-                                    <FormikForm>
-                                        <Modal.Body>
-                                            <Form.Group controlId="formBasicName">
-                                                <Form.Label>Nombre</Form.Label>
-                                                <Field className="form-control" type="text" name="name" disabled />
-                                                <ErrorMessage name="name" component="div" className="text-danger" />
-                                            </Form.Group>
-                                            <Form.Group controlId="formBasicLastName">
-                                                <Form.Label>Apellidos</Form.Label>
-                                                <Field className="form-control" type="text" name="lastName" disabled />
-                                                <ErrorMessage name="lastName" component="div" className="text-danger" />
-                                            </Form.Group>
-                                            <Form.Group controlId="formBasicDni">
-                                                <Form.Label>N° Cedula</Form.Label>
-                                                <Field className="form-control" type="text" name="dni" disabled />
-                                                <ErrorMessage name="dni" component="div" className="text-danger" />
-                                            </Form.Group>
-                                            <Form.Group controlId="formBasicPhone">
-                                                <Form.Label>Teléfono</Form.Label>
-                                                <Field className="form-control" type="text" name="phone" />
-                                                <ErrorMessage name="phone" component="div" className="text-danger" />
-                                            </Form.Group>
-                                            <Form.Group controlId="formBasicMail">
-                                                <Form.Label>Correo</Form.Label>
-                                                <Field className="form-control" type="email" name="mail" />
-                                                <ErrorMessage name="mail" component="div" className="text-danger" />
-                                            </Form.Group>
-                                            <Form.Group controlId="formBasicAddress">
-                                                <Form.Label>Dirección</Form.Label>
-                                                <Field className="form-control" type="text" name="address" />
-                                                <ErrorMessage name="address" component="div" className="text-danger" />
-                                            </Form.Group>
-                                            <Form.Group controlId="formBasicCity">
-                                                <Form.Label>Ciudad</Form.Label>
-                                                <Field as="select" className="form-control" name="city">
-                                                    <option value="">Seleccionar ciudad</option>
-                                                    {CitySelect.map(ciudad => (
-                                                        <option key={ciudad.id} value={ciudad.name}>
-                                                            {ciudad.name}
-                                                        </option>
-                                                    ))}
-                                                </Field>
-                                                <ErrorMessage name="city" component="div" className="text-danger" />
-                                            </Form.Group>
-                                        </Modal.Body>
-                                        <Modal.Footer>
-                                            <Button variant="secondary" onClick={cerrarModalEdicion}>
-                                                Cancelar
-                                            </Button>
-                                            <Button variant="primary" type="submit" disabled={isSubmitting} style={{ background: '#56208c', borderColor: 'transparent' }} >
-                                                Guardar Cambios
-                                            </Button>
-                                        </Modal.Footer>
-                                    </FormikForm>
-                                )}
-                            </Formik>
-                        </Modal>
-
                         {/* Modal para GUARDAR */}
                         <Modal show={mostrarModalGuardar} onHide={cerrarModalGuardar}>
                             <Modal.Header closeButton>
@@ -378,9 +308,9 @@ function Crud_Clientes() {
                                                 <Field as="select" className="form-control" name="city">
                                                     <option value="">Seleccionar ciudad</option>
                                                     {CitySelect.map(ciudad => (
-                                                        <option key={ciudad.id} value={ciudad.name}>
-                                                            {ciudad.name}
-                                                        </option>
+                                                        <option key={ciudad.id} value={ciudad.id}>
+                                                        {ciudad.name}
+                                                    </option>
                                                     ))}
                                                 </Field>
                                                 <ErrorMessage name="city" component="div" className="text-danger" />

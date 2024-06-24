@@ -5,6 +5,8 @@ import { Modal, Form, Button} from 'react-bootstrap';
 import Navbar from "../components/Navbar_almacenista";
 import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import ProviderService from '../services/ProviderService';
+import StateService from '../services/StateService';
+import CityService from '../services/CityService';
 import Menu_almacenista from '../components/Menu_almacenista';
 import { Formik, Field, Form as FormikForm, ErrorMessage } from 'formik';
 import Swal from 'sweetalert2';
@@ -12,12 +14,12 @@ import * as Yup from 'yup';
 // Esquema de validación con Yup y Regex
 const validationSchema = Yup.object().shape({
     name: Yup.string()
-        .matches(/^[a-zA-ZñÑ]+(?:\s[a-zA-ZñÑ]+){0,2}$/, 'Esto no es un nombre.')
+        .matches(/[a-zA-ZñÑáéíóúÁÉÍÓÚ]/, 'Esto no es un nombre.')
         .min(3, 'Debe tener al menos 3 caracteres')
-        .max(20, 'Exceso de caracteres, esto no parece un nombre.')
+        .max(50, 'Exceso de caracteres, esto no parece un nombre.')
         .required('El proveedor es requerido'),
     representative: Yup.string()
-        .matches(/^[a-zA-ZñÑ]+(?:\s[a-zA-ZñÑ]+){0,3}$/, 'Esto no es un representante.')
+        .matches(/^[a-zA-ZñÑ]+(?:\s[a-zA-ZñÑ]+){0,5}$/, 'Esto no es un representante.')
         .min(3, 'Debe tener al menos 3 caracteres')
         .max(20, 'Exceso de caracteres, esto no parece un nombre.')
         .required('El representante es requerido'),
@@ -43,12 +45,16 @@ function Crud_Proveedor() {
     const [mostrarModalGuardar, setMostrarModalGuardar] = useState(false);
     const [datosFormularioEdicion, setDatosFormularioEdicion] = useState({ id: '', name: '', representative: '', mail: '', phone: '', state:'', city: '', nit: '' });
     const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
+    const [SelectEstados, setSelectEstados] = useState(null);
+    const [SelectCiudad, setSelectCiudad] = useState(null);
     const [ciudades, setCiudades] = useState([]);
     const [estados, setEstados] = useState([]);
     const [terminoBusqueda, setTerminoBusqueda] = useState('');
 
     useEffect(() => {
         fetchData();
+        fetchSelectEstado();
+        fetchSelectCiudad();
     }, []);
 
     const fetchData = async () => {
@@ -65,6 +71,26 @@ function Crud_Proveedor() {
             setEstados(estadosUnicos);
         } catch (error) {
             setError(error.message);
+        }
+    };
+
+    const fetchSelectEstado = async () => {
+        try {
+            const responseState = await StateService.getAllStates();
+            console.log("Estados array",responseState);
+            setSelectEstados(responseState.data.DATA);
+        } catch (error) {
+            console.log("Error al obtener los estados",error);
+        }
+    };
+
+    const fetchSelectCiudad = async () => {
+        try {
+            const responseCity = await CityService.getAllCitys();
+            console.log("Estados array",responseCity);
+            setSelectCiudad(responseCity.data);
+        } catch (error) {
+            console.log("Error al obtener los estados",error);
         }
     };
 
@@ -88,7 +114,6 @@ function Crud_Proveedor() {
             state: proveedor.idestado.name,
             city: proveedor.idciudad.name,
             nit: proveedor.nit
-           
         });
         setMostrarModalEdicion(true);
     };
@@ -106,10 +131,10 @@ function Crud_Proveedor() {
     const handleGuardarProveedor = async (values, { setSubmitting, resetForm }) => {
         try {
             // Obtener el ID de la ciudad seleccionada
-            const idCiudad = ciudades.find(ciudad => ciudad.name === values.city)?.id;
+            const idCiudad = values.city;
             
             // Obtener el ID del estado seleccionada
-            const idEstado = estados.find(estado => estado.name === values.state)?.id;
+            const idEstado = values.state;
             
     
         await ProviderService.createProvider({
@@ -148,10 +173,10 @@ function Crud_Proveedor() {
             console.log('Datos del proveedor a actualizar:', values);
 
             // Obtener el ID de la mascota seleccionada
-            const idCiudad = ciudades.find(ciudad => ciudad.name === values.city)?.id;
+            const idCiudad = values.city;
             
             // Obtener el ID de la especialidad seleccionada
-            const idEstado = estados.find(estado => estado.name === values.state)?.id;
+            const idEstado = values.state;
 
             const response = await ProviderService.updateProvider(values.id, {
                 name: values.name,
@@ -166,13 +191,13 @@ function Crud_Proveedor() {
                 },
                 nit: values.nit
             });
+            fetchData();
+            cerrarModalEdicion();
             Swal.fire({
                 icon: 'success',
                 title: '¡Éxito!',
                 text: 'Los cambios se guardaron correctamente.',
             });
-            fetchData();
-            cerrarModalEdicion();
         } catch (error) {
             console.error('Error al actualizar el proveedor:', error);
         } finally {
@@ -298,8 +323,8 @@ function Crud_Proveedor() {
                                                 <Form.Label>Estado</Form.Label>
                                                 <Field as="select" className="form-control" name="state">
                                                     <option value="">Seleccionar estado</option>
-                                                    {estados.map(estado => (
-                                                        <option key={estado.id} value={estado.name}>
+                                                    {SelectEstados.map(estado => (
+                                                        <option key={estado.id} value={estado.id}>
                                                             {estado.name}
                                                         </option>
                                                     ))}
@@ -310,8 +335,8 @@ function Crud_Proveedor() {
                                                 <Form.Label>Ciudad</Form.Label>
                                                 <Field as="select" className="form-control" name="city">
                                                     <option value="">Seleccionar ciudad</option>
-                                                    {ciudades.map(ciudad => (
-                                                        <option key={ciudad.id} value={ciudad.name}>
+                                                    {SelectCiudad.map(ciudad => (
+                                                        <option key={ciudad.id} value={ciudad.id}>
                                                             {ciudad.name}
                                                         </option>
                                                     ))}
@@ -378,8 +403,8 @@ function Crud_Proveedor() {
                                                 <Form.Label>Estado</Form.Label>
                                                 <Field as="select" className="form-control" name="state">
                                                     <option value="">Seleccionar estado</option>
-                                                    {estados.map(estado => (
-                                                        <option key={estado.id} value={estado.name}>
+                                                    {SelectEstados.map(estado => (
+                                                        <option key={estado.id} value={estado.id}>
                                                             {estado.name}
                                                         </option>
                                                     ))}
@@ -390,8 +415,8 @@ function Crud_Proveedor() {
                                                 <Form.Label>Ciudad</Form.Label>
                                                 <Field as="select" className="form-control" name="city">
                                                     <option value="">Seleccionar ciudad</option>
-                                                    {ciudades.map(ciudad => (
-                                                        <option key={ciudad.id} value={ciudad.name}>
+                                                    {SelectCiudad.map(ciudad => (
+                                                        <option key={ciudad.id} value={ciudad.id}>
                                                             {ciudad.name}
                                                         </option>
                                                     ))}

@@ -241,8 +241,8 @@ function Crud_Citas() {
     // Función para Guardar
     const handleGuardarCita = async (values, { setSubmitting }) => {
         try {
-            const idEspecialidad = especialidades.find(especialidad => especialidad.name === values.specialty)?.id;
-            const idVeterinario = veterinarios.find(veterinario => veterinario.name === values.veterinarian)?.id;
+            const idEspecialidad = values.specialty
+            const idVeterinario = values.veterinarian
 
             const response = await AppointmentService.createAppointment({
                 date: values.date,
@@ -399,8 +399,8 @@ function Crud_Citas() {
                                                 <Form.Label>Especialidad</Form.Label>
                                                 <Field as="select" name="specialty" className="form-control">
                                                     <option value="">Selecciona una especialidad</option>
-                                                    {EspecialidadSelect.map((especialidad, index) => (
-                                                        <option key={index} value={especialidad.name}>{especialidad.name}</option>
+                                                    {EspecialidadSelect.map(especialidad => (
+                                                        <option key={especialidad.id} value={especialidad.id}>{especialidad.name}</option>
                                                     ))}
                                                 </Field>
                                                 <ErrorMessage name="specialty" component="div" className="text-danger" />
@@ -409,8 +409,8 @@ function Crud_Citas() {
                                                 <Form.Label>Veterinario</Form.Label>
                                                 <Field as="select" name="veterinarian" className="form-control">
                                                     <option value="">Selecciona un veterinario</option>
-                                                    {VeterinariosFiltrados.map((veterinario, index) => (
-                                                        <option key={index} value={veterinario.name}>{veterinario.name}</option>
+                                                    {VeterinariosFiltrados.map(veterinario => (
+                                                        <option key={veterinario.id} value={veterinario.id}>{veterinario.name}</option>
                                                     ))}
                                                 </Field>
                                                 <ErrorMessage name="veterinarian" component="div" className="text-danger" />

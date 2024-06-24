@@ -7,7 +7,9 @@ import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import ProductService from '../services/ProductService';
 import Menu_almacenista from '../components/Menu_almacenista';
 import Swal from 'sweetalert2';
-import SelectedIngresoContext from '../context/SelectedIngresoContext';
+import StateService from '../services/StateService';
+import CategoryService from '../services/CategoryService';
+import ProviderService from '../services/ProviderService';
 import { Formik, Field, Form as FormikForm, ErrorMessage } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import UserContext from '../context/UserContext';
@@ -15,9 +17,9 @@ import * as Yup from 'yup';
 // Esquema de validación con Yup y Regex
 const validationSchema = Yup.object().shape({
     name: Yup.string()
-        .matches(/^[a-zA-ZñÑ]+(?:\s[a-zA-ZñÑ]+){0,2}$/, 'Esto no es un producto.')
+        .matches(/[a-zA-ZñÑáéíóúÁÉÍÓÚ]/, 'Esto no es un producto.')
         .min(3, 'Debe tener al menos 3 caracteres')
-        .max(15, 'Exceso de caracteres, esto no parece un producto.')
+        .max(40, 'Exceso de caracteres, esto no parece un producto.')
         .required('El producto es requerido'),
     expiration: Yup.string()
     .required('La fecha de vencimiento es requerida.')
@@ -123,6 +125,9 @@ function Crud_Prducto() {
     const [categorias, setCategorias] = useState([]);
     const [estados, setEstados] = useState([]);
     const [proveedores, setProveedores] = useState([]);
+    const [Selectcategorias, setSelectCategorias] = useState([]);
+    const [SelectProveedor, setSelectProveedor] = useState([]);
+    const [SelectProveSelectEstadoedor, setSelectEstado] = useState([]);
     const [terminoBusqueda, setTerminoBusqueda] = useState('');
 
     const handleChangeBusqueda = (event) => {
@@ -130,7 +135,37 @@ function Crud_Prducto() {
     };
     useEffect(() => {
         fetchData();
+        fetchSelectEstado();
+        fetchSelectProveedor();
+        fetchSelectCategoria();
     }, []);
+
+    const fetchSelectCategoria = async () => {
+        try {
+            const response = await CategoryService.getAllCategories();
+            setSelectCategorias(response.data);
+        } catch (error) {
+            console.log("Error al obtener las categorias",error);
+        }
+    };
+
+    const fetchSelectProveedor = async () => {
+        try {
+            const response = await ProviderService.getAllProviders();
+            setSelectProveedor(response.data.DATA);
+        } catch (error) {
+            console.log("Error al obtener los Proveedores",error);
+        }
+    };
+
+    const fetchSelectEstado = async () => {
+        try {
+            const response = await StateService.getAllStates();
+            setSelectEstado(response.data.DATA);
+        } catch (error) {
+            console.log("Error al obtener los esatdos",error);
+        }
+    };
 
     const fetchData = async () => {
         try {
@@ -192,13 +227,13 @@ function Crud_Prducto() {
     const handleGuardarProducto = async (values) => {
         try {
             // Obtener el ID de la categoria seleccionada
-            const idCategoria = categorias.find(categoria => categoria.name === values.category)?.id;
+            const idCategoria = values.category;
 
             // Obtener el ID del proveedor seleccionado
-            const idProveedor = proveedores.find(proveedor => proveedor.name === values.provider)?.id;
+            const idProveedor = values.provider;
 
             // Obtener el ID del estado seleccionado
-            const idEstado = estados.find(estado => estado.name === values.state)?.id;
+            const idEstado = values.state;
 
             const response = await ProductService.createProduct({
                 name: values.name,
@@ -215,8 +250,6 @@ function Crud_Prducto() {
                     id: idEstado
                 }
             });
-
-            console.log('Respuesta de la API:', response.data);
             fetchData(); // Actualiza la tabla
             cerrarModalGuardar(); // Cierra el modal
             // Limpiar los datos del formulario
@@ -241,13 +274,13 @@ function Crud_Prducto() {
                 console.log('Datos del producto a actualizar:', values);
     
                 // Obtener el ID de la mascota seleccionada
-                const idCategoria = categorias.find(categoria => categoria.name === values.category)?.id;
+                const idCategoria = values.category;
                 
                 // Obtener el ID de la especialidad seleccionada
-                const idProveedor = proveedores.find(proveedor => proveedor.name === values.provider)?.id;
+                const idProveedor = values.provider;
     
                 // Obtener el ID de la especialidad seleccionada
-                const idEstado = estados.find(estado => estado.name === values.state)?.id;
+                const idEstado = values.state;
     
                 const response = await ProductService.updateProduct(values.id, {
                     name: values.name,
@@ -401,8 +434,8 @@ function Crud_Prducto() {
                     <Form.Label>Categoria</Form.Label>
                     <Field as="select" className="form-control" name="category">
                         <option value="">Seleccionar categoria</option>
-                        {categorias.map(categoria => (
-                        <option key={categoria.id} value={categoria.name}>
+                        {Selectcategorias.map(categoria => (
+                        <option key={categoria.id} value={categoria.id}>
                             {categoria.name}
                         </option>
                         ))}
@@ -413,8 +446,8 @@ function Crud_Prducto() {
                     <Form.Label>Proveedor</Form.Label>
                     <Field as="select" className="form-control" name="provider">
                         <option value="">Seleccionar proveedor</option>
-                        {proveedores.map(proveedor => (
-                        <option key={proveedor.id} value={proveedor.name}>
+                        {SelectProveedor.map(proveedor => (
+                        <option key={proveedor.id} value={proveedor.id}>
                             {proveedor.name}
                         </option>
                         ))}
@@ -425,8 +458,8 @@ function Crud_Prducto() {
                     <Form.Label>Estado</Form.Label>
                     <Field as="select" className="form-control" name="state">
                         <option value="">Seleccionar estado</option>
-                        {estados.map(estado => (
-                        <option key={estado.id} value={estado.name}>
+                        {SelectProveSelectEstadoedor.map(estado => (
+                        <option key={estado.id} value={estado.id}>
                             {estado.name}
                         </option>
                         ))}
@@ -488,8 +521,8 @@ function Crud_Prducto() {
                     <Form.Label>Categoria</Form.Label>
                     <Field as="select" className="form-control" name="category">
                         <option value="">Seleccionar categoria</option>
-                        {categorias.map(categoria => (
-                        <option key={categoria.id} value={categoria.name}>
+                        {Selectcategorias.map(categoria => (
+                        <option key={categoria.id} value={categoria.id}>
                             {categoria.name}
                         </option>
                         ))}
@@ -500,8 +533,8 @@ function Crud_Prducto() {
                     <Form.Label>Proveedor</Form.Label>
                     <Field as="select" className="form-control" name="provider">
                         <option value="">Seleccionar proveedor</option>
-                        {proveedores.map(proveedor => (
-                        <option key={proveedor.id} value={proveedor.name}>
+                        {SelectProveedor.map(proveedor => (
+                        <option key={proveedor.id} value={proveedor.id}>
                             {proveedor.name}
                         </option>
                         ))}
@@ -512,8 +545,8 @@ function Crud_Prducto() {
                     <Form.Label>Estado</Form.Label>
                     <Field as="select" className="form-control" name="state">
                         <option value="">Seleccionar estado</option>
-                        {estados.map(estado => (
-                        <option key={estado.id} value={estado.name}>
+                        {SelectProveSelectEstadoedor.map(estado => (
+                        <option key={estado.id} value={estado.id}>
                             {estado.name}
                         </option>
                         ))}
