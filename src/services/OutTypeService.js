@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_outType = 'http://localhost:8080/api/outptType';
+const Url_outType = 'https://vpetsoft.onrender.com/api/outptType';
 
 class OutTypeService {
     getAllOutTypes() {

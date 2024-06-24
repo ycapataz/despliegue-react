@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_checkOut = 'http://localhost:8080/api/checkouts';
+const Url_checkOut = 'https://vpetsoft.onrender.com/api/checkouts';
 
 class CheckOutService {
     getAllOuts() {

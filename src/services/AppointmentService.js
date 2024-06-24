@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_appointment = 'http://localhost:8080/api/Appointment';
+const Url_appointment = 'https://vpetsoft.onrender.com/api/Appointment';
 
 class AppointmentService {
     getAllAppointments() {

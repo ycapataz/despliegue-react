@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_MedicalExam= 'http://localhost:8080/api/medicalExam';
+const Url_MedicalExam= 'https://vpetsoft.onrender.com/api/medicalExam';
 
 class MedicalExamService {
     getAllMedicalExams() {

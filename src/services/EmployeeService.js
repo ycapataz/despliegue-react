@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_employee = 'http://localhost:8080/api/employees';
+const Url_employee = 'https://vpetsoft.onrender.com/api/employees';
 
 class EmployeeService {
     getAllEmployees() {

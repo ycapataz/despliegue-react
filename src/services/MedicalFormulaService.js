@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_medicalFormula = 'http://localhost:8080/api/medicalFormula';
+const Url_medicalFormula = 'https://vpetsoft.onrender.com/api/medicalFormula';
 
 class MedicalFormulaService {
     getAllMedicalFormula() {

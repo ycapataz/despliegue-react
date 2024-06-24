@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_Income= 'http://localhost:8080/api/income';
+const Url_Income= 'https://vpetsoft.onrender.com/api/income';
 
 class IncomeService {
     getAllIncomes() {

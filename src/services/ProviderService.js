@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_provider = 'http://localhost:8080/api/Provider';
+const Url_provider = 'https://vpetsoft.onrender.com/api/Provider';
 
 class ProviderService {
     getAllProviders() {

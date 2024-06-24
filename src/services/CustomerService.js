@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_customer = 'http://localhost:8080/api/Customers';
+const Url_customer = 'https://vpetsoft.onrender.com/api/Customers';
 
 class CustomerService {
     getAllCustomers() {

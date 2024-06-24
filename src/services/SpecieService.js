@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Url_specie = 'http://localhost:8080/api/Species';
+const Url_specie = 'https://vpetsoft.onrender.com/api/Species';
 
 class SpecieService {
     getAllSpecies() {
