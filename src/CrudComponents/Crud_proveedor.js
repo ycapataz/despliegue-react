@@ -6,6 +6,35 @@ import Navbar from "../components/Navbar_almacenista";
 import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import ProviderService from '../services/ProviderService';
 import Menu_almacenista from '../components/Menu_almacenista';
+import { Formik, Field, Form as FormikForm, ErrorMessage } from 'formik';
+import Swal from 'sweetalert2';
+import * as Yup from 'yup';
+// Esquema de validación con Yup y Regex
+const validationSchema = Yup.object().shape({
+    name: Yup.string()
+        .matches(/^[a-zA-ZñÑ]+(?:\s[a-zA-ZñÑ]+){0,2}$/, 'Esto no es un nombre.')
+        .min(3, 'Debe tener al menos 3 caracteres')
+        .max(20, 'Exceso de caracteres, esto no parece un nombre.')
+        .required('El proveedor es requerido'),
+    representative: Yup.string()
+        .matches(/^[a-zA-ZñÑ]+(?:\s[a-zA-ZñÑ]+){0,3}$/, 'Esto no es un representante.')
+        .min(3, 'Debe tener al menos 3 caracteres')
+        .max(20, 'Exceso de caracteres, esto no parece un nombre.')
+        .required('El representante es requerido'),
+    phone: Yup.string()
+        .matches(/^(310|311|312|313|314|321|320|322|323|315|316|317|318|319|350|351|300|301|302|324|304)[0-9]{7}$/, "Ingresar un teléfono válido.")
+        .required('El telefono es requerido'),
+    mail: Yup.string()
+        .matches(/^[a-zA-Z0-9._-]+@(gmail|hotmail|outlook|misena|soy.sena)+\.(co|com|edu.co|edu.com)$/,"Correo electrónico inválido")
+        .required('El correo es requerido'),
+    nit: Yup.string()
+        .matches(/^\+?\d{7,12}$/, "NIT inválido")
+        .required('El NIT es requerido requerido'),
+    city: Yup.string()
+        .required('La ciudad es requerida'),
+    state: Yup.string()
+        .required('El estado es requerido')
+});
 
 function Crud_Proveedor() {
     const [providers, setProviders] = useState([]);
@@ -16,6 +45,7 @@ function Crud_Proveedor() {
     const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
     const [ciudades, setCiudades] = useState([]);
     const [estados, setEstados] = useState([]);
+    const [terminoBusqueda, setTerminoBusqueda] = useState('');
 
     useEffect(() => {
         fetchData();
@@ -24,7 +54,7 @@ function Crud_Proveedor() {
     const fetchData = async () => {
         try {
             const response = await ProviderService.getAllProviders();
-            setProviders(response.data.DATA);
+            setProviders(response.data.DATA.reverse());
             // Obtener ciudades y estados disponibles
             const ciudades = response.data.DATA.map(proveedor => ({ id: proveedor.idciudad.id, name: proveedor.idciudad.name }));
             const estados = response.data.DATA.map(proveedor => ({ id: proveedor.idestado.id, name: proveedor.idestado.name }));
@@ -39,6 +69,7 @@ function Crud_Proveedor() {
     };
 
     const abrirModalGuardar = () => {
+        setDatosFormularioEdicion({ id: '', name: '', representative: '', mail: '', phone: '', state:'', city: '', nit: '' });
         setMostrarModalGuardar(true);
     };
     
@@ -64,24 +95,29 @@ function Crud_Proveedor() {
 
     const cerrarModalEdicion = () => {
         setMostrarModalEdicion(false);
+        Swal.fire({
+            icon: 'info',
+            title: 'Cancelado',
+            text: 'Edicion de proveedor cancelada.'
+        });
     };
 
     //Funcion para Guardar
-    const handleGuardarProveedor = async () => {
+    const handleGuardarProveedor = async (values, { setSubmitting, resetForm }) => {
         try {
             // Obtener el ID de la ciudad seleccionada
-            const idCiudad = ciudades.find(ciudad => ciudad.name === datosFormularioEdicion.city)?.id;
+            const idCiudad = ciudades.find(ciudad => ciudad.name === values.city)?.id;
             
             // Obtener el ID del estado seleccionada
-            const idEstado = estados.find(estado => estado.name === datosFormularioEdicion.state)?.id;
+            const idEstado = estados.find(estado => estado.name === values.state)?.id;
             
     
-            const response = await ProviderService.createProvider({
-                name: datosFormularioEdicion.name,
-                representative: datosFormularioEdicion.representative,
-                mail: datosFormularioEdicion.mail,
-                phone: datosFormularioEdicion.phone,
-                nit: datosFormularioEdicion.nit,
+        await ProviderService.createProvider({
+                name: values.name,
+                representative: values.representative,
+                mail: values.mail,
+                phone: values.phone,
+                nit: values.nit,
                 idestado: {
                     id: idEstado
                 },
@@ -90,51 +126,78 @@ function Crud_Proveedor() {
                 },
                 
             });
-            console.log('Respuesta de la API:', response.data);
-            fetchData(); // Actualiza la tabla
-            cerrarModalGuardar(); // Cierra el modal
-            // Limpiar los datos del formulario
-            setDatosFormularioEdicion({ id: '', name: '', representative: '', mail: '', phone: '', state:'', city: '', nit: '' });
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'Proveedor guardado correctamente.',
+            });
+            fetchData();
+            cerrarModalGuardar();
+            resetForm();
         } catch (error) {
             console.error('Error al guardar el proveedor:', error);
             // Manejar el error
+        } finally {
+            setSubmitting(false);
         }
     };    
 
     //Funcion de actualizar
-    const handleActualizarProveedor = async (datosProveedor) => {
+    const handleActualizarProveedor = async (values, { setSubmitting }) => {
         try {
-            console.log('Datos del proveedor a actualizar:', datosProveedor);
+            console.log('Datos del proveedor a actualizar:', values);
 
             // Obtener el ID de la mascota seleccionada
-            const idCiudad = ciudades.find(ciudad => ciudad.name === datosProveedor.city)?.id;
+            const idCiudad = ciudades.find(ciudad => ciudad.name === values.city)?.id;
             
             // Obtener el ID de la especialidad seleccionada
-            const idEstado = estados.find(estado => estado.name === datosProveedor.state)?.id;
+            const idEstado = estados.find(estado => estado.name === values.state)?.id;
 
-            const response = await ProviderService.updateProvider(datosProveedor.id, {
-                name: datosProveedor.name,
-                representative: datosProveedor.representative,
-                mail: datosProveedor.mail,
-                phone: datosProveedor.phone,
+            const response = await ProviderService.updateProvider(values.id, {
+                name: values.name,
+                representative: values.representative,
+                mail: values.mail,
+                phone: values.phone,
                 idestado: {
                     id: idEstado
                 },
                 idciudad: {
                     id: idCiudad
                 },
-                nit: datosProveedor.nit
+                nit: values.nit
             });
-            console.log('Respuesta de la API:', response.data);
-            fetchData();//Actualiza la tabla
-            cerrarModalEdicion();//Cierra el modal o ventana emergente
-
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'Los cambios se guardaron correctamente.',
+            });
+            fetchData();
+            cerrarModalEdicion();
         } catch (error) {
             console.error('Error al actualizar el proveedor:', error);
-            // Manejar el error
+        } finally {
+            setSubmitting(false);
         }
     };      
+    // Función para manejar el cambio en el input de búsqueda
+    const manejarCambioBusqueda = (e) => {
+        setTerminoBusqueda(e.target.value);
+    };
 
+    // Filtrar los ingresos según el ID del empleado y el término de búsqueda
+    const proveedoresFiltrados = providers.filter(provider => {
+        const termino = terminoBusqueda.toLowerCase();
+        return (
+            provider.id?.toString().includes(termino) ||
+            provider.name?.toLowerCase().includes(termino) ||
+            provider.representative?.toLowerCase().includes(termino) ||
+            provider.phone?.toString().toLowerCase().includes(termino) ||
+            provider.mail?.toLowerCase().includes(termino) ||
+            provider.state?.name?.toLowerCase().includes(termino) ||
+            provider.idestado?.name?.toLowerCase().includes(termino) ||
+            provider.idciudad?.name?.toLowerCase().includes(termino)
+        );
+    });
     return (
         <>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }} >
@@ -153,7 +216,7 @@ function Crud_Proveedor() {
                     </div>
                     <br/>
                     <div className={StylesTabla.DivInpuctsearch}>
-                        <input className={StylesTabla.Inpuctsearch} type="search" placeholder="Buscar" />
+                        <input className={StylesTabla.Inpuctsearch} type="search" placeholder="Buscar" value={terminoBusqueda} onChange={manejarCambioBusqueda}/>
                         <i className="bi bi-search-heart" style={{ color: '#56208c', position: 'absolute', top: '10px', right: '1rem', fontSize: '1.2rem' }}></i>
                     </div>
                     <br/>
@@ -177,12 +240,12 @@ function Crud_Proveedor() {
                         </tr>
                     </thead>
                     <tbody>
-                        {providers.map(provider => (
+                        {proveedoresFiltrados.map(provider => (
                             <tr key={provider.id}>
                                 <td style={{ textAlign: "center" }}>{provider.id}</td>
                                 <td style={{ textAlign: "center" }}>{provider.name}</td>
                                 <td style={{ textAlign: "center" }}>{provider.representative}</td>
-                                <td style={{ textAlign: "center" }}>{provider.mail}</td>
+                                <td style={{ textAlign: "center", textTransform: "initial" }}>{provider.mail}</td>
                                 <td style={{ textAlign: "center" }}>{provider.phone}</td>
                                 <td style={{ textAlign: "center" }}>{provider.idestado.name}</td>
                                 <td style={{ textAlign: "center" }}>{provider.idciudad.name}</td>
@@ -202,104 +265,152 @@ function Crud_Proveedor() {
                 <Modal.Header closeButton>
                     <Modal.Title>Editar Proveedor</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group controlId="formBasicDate">
-                            <Form.Label>Proveedor</Form.Label>
-                            <Form.Control type="text" value={datosFormularioEdicion.name} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, name: e.target.value })} />
-                        </Form.Group>
-                        <Form.Group controlId="formBasicName">
-                            <Form.Label>Representante</Form.Label>
-                            <Form.Control type="text" value={datosFormularioEdicion.representative} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, representative: e.target.value })} />
-                        </Form.Group>
-                        <Form.Group controlId="formBasicHour">
-                            <Form.Label>Correo</Form.Label>
-                            <Form.Control type="mail" value={datosFormularioEdicion.mail} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, mail: e.target.value })} />
-                        </Form.Group>
-                        <Form.Group controlId="formBasicHour">
-                            <Form.Label>Telefono</Form.Label>
-                            <Form.Control type="number" min="300" value={datosFormularioEdicion.phone} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, phone: e.target.value })} />
-                        </Form.Group>
-                        <Form.Group controlId="formBasicPetName">
-                            <Form.Label>Ciudad</Form.Label>
-                            <Form.Control as="select" value={datosFormularioEdicion.city} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, city: e.target.value })}>
-                                <option value="">Selecciona una ciudad</option>
-                                {ciudades.map((ciudad, index) => (
-                                    <option key={index} value={ciudad.name}>{ciudad.name}</option>
-                                ))}
-                            </Form.Control>
-                        </Form.Group>
-                        <Form.Group controlId="formBasicSpecialty">
-                            <Form.Label>Estado</Form.Label>
-                            <Form.Control as="select" value={datosFormularioEdicion.state} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, state: e.target.value })}>
-                                <option value="">Selecciona un estado</option>
-                                {estados.map((estado, index) => (
-                                    <option key={index} value={estado.name}>{estado.name}</option>
-                                ))}
-                            </Form.Control>
-                        </Form.Group>
-                        <Form.Group controlId="formBasicHour">
-                            <Form.Label>NIT</Form.Label>
-                            <Form.Control type="text" value={datosFormularioEdicion.nit} onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, nit: e.target.value })} />
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
+                <Formik
+                    initialValues={datosFormularioEdicion}
+                    enableReinitialize={true}
+                    validationSchema={validationSchema}
+                    onSubmit={handleActualizarProveedor}
+                >
+                    {({ isSubmitting }) => (
+                        <FormikForm>
+                            <Modal.Body>
+                                            <Form.Group controlId="formBasicName">
+                                                <Form.Label>Proveedor</Form.Label>
+                                                <Field className="form-control" type="text" name="name" disabled />
+                                                <ErrorMessage name="name" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicLastName">
+                                                <Form.Label>Representante</Form.Label>
+                                                <Field className="form-control" type="text" name="representative" />
+                                                <ErrorMessage name="representative" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicMail">
+                                                <Form.Label>Correo</Form.Label>
+                                                <Field className="form-control" type="email" name="mail" />
+                                                <ErrorMessage name="mail" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicPhone">
+                                                <Form.Label>Teléfono</Form.Label>
+                                                <Field className="form-control" type="text" name="phone" />
+                                                <ErrorMessage name="phone" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicCity">
+                                                <Form.Label>Estado</Form.Label>
+                                                <Field as="select" className="form-control" name="state">
+                                                    <option value="">Seleccionar estado</option>
+                                                    {estados.map(estado => (
+                                                        <option key={estado.id} value={estado.name}>
+                                                            {estado.name}
+                                                        </option>
+                                                    ))}
+                                                </Field>
+                                                <ErrorMessage name="state" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicCity">
+                                                <Form.Label>Ciudad</Form.Label>
+                                                <Field as="select" className="form-control" name="city">
+                                                    <option value="">Seleccionar ciudad</option>
+                                                    {ciudades.map(ciudad => (
+                                                        <option key={ciudad.id} value={ciudad.name}>
+                                                            {ciudad.name}
+                                                        </option>
+                                                    ))}
+                                                </Field>
+                                                <ErrorMessage name="city" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicPhone">
+                                                <Form.Label>NIT</Form.Label>
+                                                <Field className="form-control" type="text" name="nit" disabled/>
+                                                <ErrorMessage name="nit" component="div" className="text-danger" />
+                                            </Form.Group>
+                                        </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={cerrarModalEdicion}>Cancelar</Button>
-                    <Button variant="primary" style={{background:'#56208c', borderColor: 'transparent'}} onClick={() =>handleActualizarProveedor(datosFormularioEdicion)}>Actualizar Proveedor</Button>
+                    <Button variant="primary" type="submit" style={{ background: '#56208c', borderColor: 'transparent' }} disabled={isSubmitting}>Actualizar Proveedor</Button>
                 </Modal.Footer>
+                </FormikForm>
+                    )}
+                </Formik>    
             </Modal>
                 {/*Modal o ventana emejernte para GUARDAR */}
                 <Modal show={mostrarModalGuardar} onHide={cerrarModalGuardar}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Generar Proveedor</Modal.Title>
+                        <Modal.Title>Crear Proveedor</Modal.Title>
                     </Modal.Header>
-                    <Modal.Body>
-                        <Form>
-                            <Form.Group controlId="formBasicDate">
-                                <Form.Label>Proveedor</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese el nombre del proveedor" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, name: e.target.value })} />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicHour">
-                                <Form.Label>Representante</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese el nombre del representante" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, representative: e.target.value })} />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicDate">
-                                <Form.Label>Correo</Form.Label>
-                                <Form.Control type="mail" placeholder="Ingrese el correo del proveedor" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, mail: e.target.value })} />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicHour">
-                                <Form.Label>Telefono</Form.Label>
-                                <Form.Control type="number" min="3" placeholder="Ingrese el telefono del proveedor" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, phone: e.target.value })} />
-                            </Form.Group>
-                            <Form.Group controlId="formBasicSpecialty">
-                                <Form.Label>Estado</Form.Label>
-                                <Form.Control as="select" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, state: e.target.value })}>
-                                    <option value="">Selecciona un estado</option>
-                                    {estados.map((estado, index) => (
-                                        <option key={index} value={estado.name}>{estado.name}</option>
-                                    ))}
-                                </Form.Control>
-                            </Form.Group>
-                            <Form.Group controlId="formBasicPetName">
-                                <Form.Label>Ciudad</Form.Label>
-                                <Form.Control as="select" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, city: e.target.value })}>
-                                    <option value="">Selecciona una ciudad</option>
-                                    {ciudades.map((ciudad, index) => (
-                                        <option key={index} value={ciudad.name}>{ciudad.name}</option>
-                                    ))}
-                                </Form.Control>
-                            </Form.Group>
-                            <Form.Group controlId="formBasicDate">
-                                <Form.Label>NIT</Form.Label>
-                                <Form.Control type="text" placeholder="Ingrese el nit del proveedor" onChange={(e) => setDatosFormularioEdicion({ ...datosFormularioEdicion, nit: e.target.value })} />
-                            </Form.Group>
-                        </Form>
-                    </Modal.Body>
+                    <Formik
+                        initialValues={{
+                            id: '',
+                            name: '',
+                            representative: '',
+                            mail: '',
+                            phone: '',
+                            state: '',
+                            city: '',
+                            nit: ''
+                            }}
+                                validationSchema={validationSchema}
+                                onSubmit={handleGuardarProveedor}
+                            >
+                            {({ isSubmitting }) => (
+                                <FormikForm>
+                                    <Modal.Body>
+                                            <Form.Group controlId="formBasicName">
+                                                <Form.Label>Proveedor</Form.Label>
+                                                <Field className="form-control" type="text" name="name" />
+                                                <ErrorMessage name="name" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicLastName">
+                                                <Form.Label>Representante</Form.Label>
+                                                <Field className="form-control" type="text" name="representative" />
+                                                <ErrorMessage name="representative" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicMail">
+                                                <Form.Label>Correo</Form.Label>
+                                                <Field className="form-control" type="email" name="mail" />
+                                                <ErrorMessage name="mail" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicPhone">
+                                                <Form.Label>Teléfono</Form.Label>
+                                                <Field className="form-control" type="text" name="phone" />
+                                                <ErrorMessage name="phone" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicCity">
+                                                <Form.Label>Estado</Form.Label>
+                                                <Field as="select" className="form-control" name="state">
+                                                    <option value="">Seleccionar estado</option>
+                                                    {estados.map(estado => (
+                                                        <option key={estado.id} value={estado.name}>
+                                                            {estado.name}
+                                                        </option>
+                                                    ))}
+                                                </Field>
+                                                <ErrorMessage name="state" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicCity">
+                                                <Form.Label>Ciudad</Form.Label>
+                                                <Field as="select" className="form-control" name="city">
+                                                    <option value="">Seleccionar ciudad</option>
+                                                    {ciudades.map(ciudad => (
+                                                        <option key={ciudad.id} value={ciudad.name}>
+                                                            {ciudad.name}
+                                                        </option>
+                                                    ))}
+                                                </Field>
+                                                <ErrorMessage name="city" component="div" className="text-danger" />
+                                            </Form.Group>
+                                            <Form.Group controlId="formBasicPhone">
+                                                <Form.Label>NIT</Form.Label>
+                                                <Field className="form-control" type="text" name="nit" />
+                                                <ErrorMessage name="nit" component="div" className="text-danger" />
+                                            </Form.Group>
+                                        </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={cerrarModalGuardar}>Cancelar</Button>
-                        <Button variant="primary" style={{background:'#56208c', borderColor: 'transparent'}} onClick={handleGuardarProveedor}>Guardar Proveedor</Button>
+                        <Button variant="primary" type="submit"style={{ background: '#56208c', borderColor: 'transparent' }} disabled={isSubmitting} >Guardar Proveedor</Button>
                     </Modal.Footer>
+                    </FormikForm>
+                                )}
+                            </Formik>
                 </Modal>
         </div>
         </div>

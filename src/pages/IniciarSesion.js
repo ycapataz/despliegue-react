@@ -5,10 +5,12 @@ import LoginServices from '../services/LoginServices';
 import { Formik } from 'formik';
 import { Navigate } from 'react-router-dom';
 import UserContext from '../context/UserContext';
+import PasswordResetRequestModal from '../components/PasswordResetRequest';
 
 function IniciarSesion() {
     const { setUser } = useContext(UserContext);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [showPasswordResetModal, setShowPasswordResetModal] = useState(false);
 
     const handleLoginSubmit = async (values, { setSubmitting, setErrors }) => {
         console.log('Formulario enviado');
@@ -126,7 +128,11 @@ function IniciarSesion() {
                                 <button className="btn-submit" type="submit" disabled={isSubmitting}>Iniciar sesión</button>
                                 <br /><br /><br />
                                 {/* <p><a href="../HTML/registrarse.html" className="form-label">¿No tiene cuenta? Regístrese acá</a></p> */}
-                                <p><a href="../HTML/olvcon.html" className="form-label">¿Olvidó su contraseña?</a></p>
+                                <p className="form-label" style={{ cursor: 'pointer', color: '#C4FD96' }} onClick={() => setShowPasswordResetModal(true)}>
+                                    ¿Olvidó su contraseña?
+                                </p>
+                                {/* Modal de restablecimiento de contraseña */}
+                                <PasswordResetRequestModal show={showPasswordResetModal} onClose={() => setShowPasswordResetModal(false)} />
                             </form>
                         )}
                     </Formik>

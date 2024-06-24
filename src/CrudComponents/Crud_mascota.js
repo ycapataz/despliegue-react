@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import Swal from 'sweetalert2'; //Se importan sweetalert para manejar alertas.
 import CustomerService from '../services/CustomerService';
 import BreedService from '../services/BreedService';
@@ -12,7 +11,6 @@ import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import PetService from '../services/PetService';
 import Menu_recepcionista from '../components/Menu_recepcionista';
 import { Formik, Field, ErorMessage } from 'formik';
-import ReporteExcel from '../components/ReporteExcel';
 import { useNavigate } from 'react-router-dom';
 import UserContext from '../context/UserContext';
 
@@ -28,6 +26,7 @@ function Crud_mascota(){
     const [Generos, setGeneros] = useState([]);
     const [Clientes, setClientes] = useState([]);
     const navigate = useNavigate();
+    const [FilteredClientesSelect, setFilteredClientesSelect] = useState([]);
     const [terminoBusqueda, setTerminoBusqueda] = useState('');
     const handleChangeBusqueda = (event) => {
         setTerminoBusqueda(event.target.value);
@@ -209,7 +208,7 @@ function Crud_mascota(){
 
     const fechaActual = obtenerFechaActual();
 
-    const GuardarMascota = async (values) => {
+    const GuardarMascota = async (values, {resetForm }) => {
         try {
             const mascota = {
                 name: values.name,
@@ -230,6 +229,7 @@ function Crud_mascota(){
                 title: '¡Éxito!',
                 text: 'La mascota se ha guardado correctamente.',
             });
+            resetForm();
         } catch (error) {
             console.error('Error al guardar la mascota:', error);
             Swal.fire({
@@ -256,7 +256,7 @@ function Crud_mascota(){
             errors.color = "Por favor ingrese un color valido"
         }
     
-        // Validar fecha de nacimiento.
+    // Validar fecha de nacimiento.
     if (!values.dateBirth) {
         errors.dateBirth = 'La fecha de nacimiento es requerida.';
     } else {
@@ -334,6 +334,14 @@ const mascotasFiltradas = pets.filter(mascota => {
         setModalIsOpen(false);
     };
 
+    const handleDniChange = (event) => {
+        const dni = event.target.value;
+        setDni(dni);
+        const filtered = Clientes.filter(mascota => mascota.dni === dni);
+        setFilteredClientesSelect(filtered);
+    };
+    
+
     return (
         <>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }} >
@@ -396,7 +404,7 @@ const mascotasFiltradas = pets.filter(mascota => {
                 </table>
             </div>
             {/*Modal o ventana emergente para EDITAR */}
-            <Formik
+        <Formik
             initialValues={{
                 name: editedPet.name || '',
                 color: editedPet.color || '',
@@ -478,7 +486,7 @@ const mascotasFiltradas = pets.filter(mascota => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={touched.idcliente && !!errors.idcliente}
-                disabled 
+                disabled
             >
             <option value="">Selecciona un cliente</option>
                 {Clientes.map(cliente => (
@@ -618,6 +626,18 @@ const mascotasFiltradas = pets.filter(mascota => {
             />
             <Form.Control.Feedback type="invalid">{errors.number_microchip}</Form.Control.Feedback>
         </Form.Group>
+        <Form.Group controlId="formBasiccedula">
+            <Form.Label>N° Cedula cliente</Form.Label>
+            <Form.Control
+                type="text"
+                name="number_microchip"
+                value={dni}
+                onChange={handleDniChange}
+                onBlur={handleBlur}
+                isInvalid={touched.number_microchip && !!errors.number_microchip}
+            />
+            <Form.Control.Feedback type="invalid">{errors.number_microchip}</Form.Control.Feedback>
+        </Form.Group>
         <Form.Group controlId="formBasicCliente">
             <Form.Label>Cliente</Form.Label>
             <Form.Control
@@ -628,9 +648,9 @@ const mascotasFiltradas = pets.filter(mascota => {
                 onBlur={handleBlur}
                 isInvalid={touched.idcliente && !!errors.idcliente}
             >
-            <option value="">Selecciona un cliente</option>
-                {Clientes.map(cliente => (
-                    <option key={cliente.id} value={cliente.id}>{cliente.name}</option>
+                <option value="">Selecciona un cliente</option>
+                {FilteredClientesSelect.map(cliente => (
+                    <option key={cliente.id} value={cliente.id}>{cliente.name} {cliente.lastName}</option>
                 ))}
             </Form.Control>
             <Form.Control.Feedback type="invalid">{errors.idcliente}</Form.Control.Feedback>

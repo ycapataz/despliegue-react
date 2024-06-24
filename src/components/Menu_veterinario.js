@@ -7,7 +7,7 @@ import UserContext from '../context/UserContext';
 
 function MenuVeterinario() {
     const { user } = useContext(UserContext);
-    const nombreUsuario = user ? user.name : 'Nombre no disponible';
+    const nombreUsuario = user ? `${user.name} ${user.lastName}` : 'Nombre no disponible';
     return (
         <>
             <div className={stylev.navbar}>

@@ -373,14 +373,14 @@ function CrudRegistroClinico() {
                     <thead className={StylesTabla.tablethead}>
                         <tr>
                             <th style={{ textAlign: "center" }}>ID</th>
-                            <th style={{ textAlign: "center" }}>Frecuencia cardíaca</th>
-                            <th style={{ textAlign: "center" }}>Temperatura</th>
+                            <th style={{ textAlign: "center" }}>F/C</th>
+                            <th style={{ textAlign: "center" }}>T</th>
                             <th style={{ textAlign: "center" }}>Fecha Registro Clínico</th>
                             <th style={{ textAlign: "center" }}>Observaciones</th>                          
                             <th style={{ textAlign: "center" }}>Fecha Ingreso</th>
                             <th style={{ textAlign: "center" }}>Creado por</th>
                             <th style={{ textAlign: "center" }}>Examen</th>
-                            <th style={{ textAlign: "center" }}>N° dueño mascota</th>
+                            <th style={{ textAlign: "center" }}>CC Propietario</th>
                             <th style={{ textAlign: "center" }}>Mascotas</th>
                             <th style={{ textAlign: "center" }}>Enfermedad</th>
                             <th style={{ textAlign: "center" }}>Acciones</th>

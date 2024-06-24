@@ -21,6 +21,10 @@ import { SelectedRegistroClinicoProvider } from './context/SelectedRegistroConte
 import CrudEmpleado from './CrudComponents/Crud_empleado';
 import ProtectedRoute from './routes/ProtectedRoute';
 import CrudMascota from './CrudComponents/Crud_mascota';
+import PasswordResetRequest from './components/PasswordResetRequest';
+import PasswordReset from './components/PasswordReset';
+import Crud_entradas from './CrudComponents/Crud_entradas';
+import Crud_salidas from './CrudComponents/Crud_salidas';
 
 function App() {
   return (
@@ -42,6 +46,10 @@ function App() {
                 <Route path="/registrarse" element={<Registrarse />} />
                 <Route path="/mapa_del_sitio" element={<MapaSitio />} />
 
+                {/* Rutas de restablecimiento de contraseña */}
+                <Route path="/reset-password-request" element={<PasswordResetRequest />} />
+                <Route path="/reset-password" element={<PasswordReset />} />
+
                 //Modulo protegido gestión de inventario.
                 <Route
                   path="/producto" 
@@ -50,6 +58,14 @@ function App() {
                 <Route
                   path="/proveedor" 
                   element={<ProtectedRoute component={CrudProveedor} />}
+                />
+                <Route
+                  path="/Salidas"
+                  element={<ProtectedRoute component={Crud_salidas} />}
+                />
+                <Route
+                  path="/Entradas"
+                  element={<ProtectedRoute component={Crud_entradas} />}
                 />
                 
                 

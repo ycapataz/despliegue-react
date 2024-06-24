@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import Swal from 'sweetalert2'; //Se importan sweetalert para manejar alertas.
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Modal, Form, Button} from 'react-bootstrap';
@@ -11,7 +10,6 @@ import PostService from '../services/PostService';
 import EpsService from '../services/EpsService';
 import Menu_recepcionista from '../components/Menu_recepcionista';
 import { Formik, Field, ErorMessage } from 'formik';
-import ReporteExcel from '../components/ReporteExcel';
 import { useNavigate } from 'react-router-dom';
 import UserContext from '../context/UserContext';
 
@@ -67,7 +65,6 @@ function Crud_empleado(){
         lastName: '',
         age: '',
         mail: '',
-        password: '',
         address: '',
         phone: '',
         birthdayDate: '',
@@ -83,20 +80,19 @@ function Crud_empleado(){
         lastName: '',
         age: '',
         mail: '',
-        password: '',
         address: '',
         phone: '',
         birthdayDate: '',
         dni: '',
         ideps: '',
         idcargo: '',
-        idespecialidad: '',
+        idespecialidad: ''
     });
 
     const fetchEmployees = async () => {
         try{
             const response = await EmployeeService.getAllEmployees();
-            setEmployees(response.data);
+            setEmployees(response.data.reverse());
         } catch (error) {
             console.error('Error al obtener los empleados:', error);
         }
@@ -137,66 +133,65 @@ function Crud_empleado(){
         fetchCargos();
     }, []);
 
-    const handleEditEmployee = (employee) => {
-        setEditedEmployee(employee);
-        setDatosFormularioEdicion({
-            id: '',
-            name: '',
-            lastName: '',
-            age: '',
-            mail: '',
-            password: '',
-            address: '',
-            phone: '',
-            birthdayDate: '',
-            dni: '',
-            ideps: editedEmployee.ideps,
-            idcargo: editedEmployee.idcargo,
-            idespecialidad: editedEmployee.idespecialidad,
-        });
-        setShowModal(true);
-    };
-
-    const handleCloseModal = () => {
-        setShowModal(false);
-        Swal.fire({
-            icon: 'info',
-            title: 'Cancelado',
-            text: 'La edición ha sido cancelada.'
-        });
-    };
-
-    const Editar = async (values) => {
-        try {
-            await EmployeeService.updateEmployee(editedEmployee.id, {
-                name: values.name,
-                lastName: values.lastName,
-                age: values.age,
-                mail: values.mail,
-                address: values.address,
-                phone: values.phone,
-                birthdayDate: values.birthdayDate,
-                dni: values.dni,
-                ideps: { id: values.ideps },
-                idcargo: { id: values.idcargo },
-                idespecialidad: { id: values.idespecialidad },
+        const handleEditEmployee = (employee) => {
+            setEditedEmployee(employee);
+            setDatosFormularioEdicion({
+                name: '',
+                lastName: '',
+                age: '',
+                mail: '',
+                address: '',
+                phone: '',
+                birthdayDate: '',
+                dni: '',
+                ideps: editedEmployee.ideps || '', // Ajusta según la estructura de tu backend
+                idcargo: editedEmployee.idcargo || '',
+                idespecialidad: editedEmployee.idespecialidad
             });
+            setShowModal(true);
+        };
+        const handleCloseModal = () => {
             setShowModal(false);
-            fetchEmployees();
             Swal.fire({
-                icon: 'success',
-                title: '¡Éxito!',
-                text: 'Los cambios se guardaron correctamente.',
+                icon: 'info',
+                title: 'Cancelado',
+                text: 'La edición ha sido cancelada.'
             });
-        } catch (error) {
-            console.error('Error al guardar los cambios del empleado:', error);
-            Swal.fire({
-                icon: 'error',
-                title: '¡Error!',
-                text: 'Hubo un error al guardar los cambios.',
-            });
-        }
-    };
+        };
+
+        console.log('editedEmployee',editedEmployee)
+
+        const EditarEmployee = async (values) => {
+            try {
+                await EmployeeService.updateEmployee(editedEmployee.id, {
+                    name: values.name,
+                    lastName: values.lastName,
+                    age: values.age,
+                    mail: values.mail,
+                    address: values.address,
+                    phone: values.phone,
+                    birthdayDate: values.birthdayDate,
+                    dni: values.dni,
+                    ideps: { id: values.ideps },  // Asegúrate de que ideps, idcargo, idespecialidad sean objetos con el campo id
+                    idcargo: { id: values.idcargo },
+                    idespecialidad: { id: values.idespecialidad },
+                });
+                setShowModal(false);
+                fetchEmployees(); // Actualiza la lista de empleados después de la edición
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Los cambios se guardaron correctamente.',
+                });
+            } catch (error) {
+                console.error('Error al guardar los cambios del empleado:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: '¡Error!',
+                    text: 'Hubo un error al guardar los cambios.',
+                });
+            }
+        };        
 
     const obtenerFechaActual = () => {
         const fechaActual = new Date();
@@ -248,21 +243,111 @@ function Crud_empleado(){
         // Validar nombre.
         if (!values.name) {
             errors.name = 'El nombre es requerido.';
+        } else if (!/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]{3,}[\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]*]*$/.test(values.name)) {
+            errors.name = "Por favor ingrese un nombre valido";
+        }
+    
+        if (!values.lastName) {
+            errors.lastName = 'El apellido es requerido.';
+        } else if (!/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]{3,}[\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]*]*$/.test(values.lastName)) {
+            errors.lastName = "Por favor ingrese un apellido valido";
+        }
+    
+        // La edad será calculada automáticamente desde la fecha de nacimiento, así que no es necesario validarla aquí.
+    
+        if (!values.mail) {
+            errors.mail = 'El correo electrónico es requerido.';
+        } else if (!/^[a-zA-Z0-9._-]+@(gmail|hotmail|outlook|misena|soy.sena)+\.(co|com|edu.co|edu.com)$/.test(values.mail)) {
+            errors.mail = "Por favor ingrese un correo electrónico válido";
+        }
+    
+        if (!values.address) {
+            errors.address = 'La dirección es requerida.';
+        } else if (!/^[A-Za-z0-9\s\-\#\.]+$/.test(values.address)) {
+            errors.address = 'Por favor ingresar una dirección válida.';
+        }
+    
+        if (!values.password) {
+            errors.password = 'Por favor ingrese un password.';
+        } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&+])([A-Za-z\d$@$!%*?&+]|[^ ]){8,15}$/.test(values.password)) {
+            errors.password = 'Por favor ingrese un password válido.';
+        }
+    
+        if (!values.phone) {
+            errors.phone = 'El número de teléfono es requerido.';
+        } else if (!/^(310|311|312|313|314|321|320|322|323|315|316|317|318|319|350|351|300|301|302|324|304)[0-9]{7}$/.test(values.phone)) {
+            errors.phone = "Por favor ingrese un número de teléfono válido";
+        }
+    
+        if (!values.birthdayDate) {
+            errors.birthdayDate = 'La fecha de nacimiento es requerida.';
+        } else {
+            const regexDate = /^\d{4}-\d{2}-\d{2}$/;
+            if (!regexDate.test(values.birthdayDate)) {
+                errors.birthdayDate = 'Formato de fecha inválido (YYYY-MM-DD).';
+            } else {
+                const selectedDate = new Date(values.birthdayDate);
+                const currentDate = new Date();
+                
+                // Calcular fechas límite
+                const minAgeDate = new Date();
+                minAgeDate.setFullYear(minAgeDate.getFullYear() - 18); // Fecha mínima para ser mayor de edad
+                
+                const maxAgeDate = new Date();
+                maxAgeDate.setFullYear(maxAgeDate.getFullYear() - 70); // Fecha máxima para no tener más de 70 años
+                
+                if (selectedDate >= currentDate) {
+                    errors.birthdayDate = 'La fecha de nacimiento debe ser anterior a la fecha actual.';
+                } else if (selectedDate > minAgeDate) {
+                    errors.birthdayDate = 'Debe ser mayor de edad (mínimo 18 años).';
+                } else if (selectedDate < maxAgeDate) {
+                    errors.birthdayDate = 'No puede tener más de 70 años.';
+                }
+            }
+        }        
+    
+        if (!values.dni) {
+            errors.dni = 'El número de cédula es requerido.';
+        } else if (!/^((\d{8})|(\d{10})|(\d{11})|(\d{6}))?$/.test(values.dni)) {
+            errors.dni = "Por favor ingrese un número de cédula válido";
+        }
+    
+        if (!values.ideps) {
+            errors.ideps = 'El nombre de la EPS es requerido.';
+        }
+    
+        if (!values.idcargo) {
+            errors.idcargo = 'El nombre del cargo es requerido.';
+        }
+    
+        if (!values.idespecialidad) {
+            errors.idespecialidad = 'El nombre de la especialidad es requerido.';
+        }
+    
+        return errors;
+    };
+
+    const validateFormEdit = (values) => {
+        const errors = {};
+    
+        // Validar nombre.
+        if (!values.name) {
+            errors.name = 'El nombre es requerido.';
         } else if (!/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]+(?:\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]+){0,2}$/.test(values.name)) {
             errors.name = "Por favor ingrese un nombre valido"
         }
 
         if (!values.lastName) {
             errors.lastName = 'El apellido es requerido.';
-        } else if (!/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]+(?:\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]+){0,2}$/.test(values.lastName)) {
-            errors.name = "Por favor ingrese un apellido valido"
+        }else if (!/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]+(?:\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]+){0,2}$/.test(values.name)) {
+            errors.name = "Por favor ingrese un nombre valido"
         }
 
         if (!values.age) {
             errors.age = 'La edad es requerida.';
         } else if (!/^\d+$/.test(values.age)) {
             errors.age = "Por favor ingrese una edad válida";
-        } else if (parseInt(values.age, 10) <= 0 || parseInt(values.age, 10) > 120) {
+        } else if (parseInt(values.age, 10) <= 0 || parseInt(values.age, 10) > 100) {
             errors.age = "Por favor ingrese una edad entre 1 y 120";
         }
         
@@ -274,28 +359,41 @@ function Crud_empleado(){
 
         if (!values.address) {
             errors.address = 'La direccion es requerida.';
-        }
-        
-        if (!values.password) {
-            errors.password = 'Por favor ingresar un password.';
-        } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&+])([A-Za-z\d$@$!%*?&+]|[^ ]){8,15}$/.test(values.password)) {
-            errors.password = 'Por favor ingresar un password valido.';
+        } else if (!/^[A-Za-z0-9\s\-\#\.]+$/.test(values.address)) {
+            errors.address = 'Por favor ingresar una direccion valida.';
         }
 
         if (!values.phone) {    
             errors.phone = 'El número de teléfono es requerido.';
-        } else if (!/^\+?\d{7,10}$/.test(values.phone)) {
+        } else if (!/^(310|311|312|313|314|321|320|322|323|315|316|317|318|319|350|351|300|301|302|324|304)[0-9]{7}$/.test(values.phone)) {
             errors.phone = "Por favor ingrese un número de teléfono válido";
         }
-        
+
         // Validar fecha de nacimiento.
         if (!values.birthdayDate) {
             errors.birthdayDate = 'La fecha de nacimiento es requerida.';
+        } else {
+            const regexDate = /^\d{4}-\d{2}-\d{2}$/;
+            if (!regexDate.test(values.birthdayDate)) {
+                errors.birthdayDate = 'Formato de fecha inválido (YYYY-MM-DD).';
+            } else {
+                const selectedDate = new Date(values.birthdayDate);
+                const currentDate = new Date();
+                const maxPastDate = new Date();
+                maxPastDate.setFullYear(maxPastDate.getFullYear() - 70);
+    
+                // Compara la fecha de nacimiento seleccionada con la fecha actual y el límite de 16 años atrás.
+                if (selectedDate >= currentDate) {
+                    errors.birthdayDate = 'La fecha de nacimiento debe ser anterior a la fecha actual.';
+                }else if (selectedDate <= maxPastDate) {
+                    errors.birthdayDate = 'Un trabajador no puede tener mas de 70 años.';
+                }
+            }
         }
 
         if (!values.dni) {
             errors.dni = 'El número de cedula es requerido.';
-        } else if (!/^\+?\d{7,10}$/.test(values.dni)) {
+        } else if (!/^((\d{8})|(\d{10})|(\d{11})|(\d{6}))?$/.test(values.dni)) {
             errors.dni = "Por favor ingrese un número de cedula válido";
         }
 
@@ -420,7 +518,7 @@ function Crud_empleado(){
                 </table>
             </div>
             {/*Modal o ventana emergente para EDITAR */}
-            <Formik
+        <Formik
             initialValues={{
                 name: editedEmployee.name || '',
                 lastName: editedEmployee.lastName || '',
@@ -432,10 +530,10 @@ function Crud_empleado(){
                 dni: editedEmployee.dni || '',
                 ideps: editedEmployee.ideps?.id || '',
                 idcargo: editedEmployee.idcargo?.id || '',
-                idespecialidad: editedEmployee.idespecialidad?.id || '',
+                idespecialidad: editedEmployee.idespecialidad?.id || ''
             }}
-            validate={validateForm}
-            onSubmit={Editar}
+            validate={validateFormEdit}
+            onSubmit={EditarEmployee}
             enableReinitialize
         >
             {({ values, errors, touched, handleSubmit, handleChange, handleBlur }) => (
@@ -454,7 +552,7 @@ function Crud_empleado(){
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={touched.name && !!errors.name}
-                readOnly={true}
+                disabled
             />
             <Form.Control.Feedback type="invalid">{errors.name}</Form.Control.Feedback>
         </Form.Group>
@@ -467,7 +565,7 @@ function Crud_empleado(){
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={touched.lastName && !!errors.lastName}
-                readOnly={true}
+                disabled
             />
             <Form.Control.Feedback type="invalid">{errors.lastName}</Form.Control.Feedback>
         </Form.Group>
@@ -480,7 +578,7 @@ function Crud_empleado(){
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={touched.age && !!errors.age}
-                readOnly={true}
+                disabled
             />
             <Form.Control.Feedback type="invalid">{errors.age}</Form.Control.Feedback>
         </Form.Group>
@@ -529,7 +627,7 @@ function Crud_empleado(){
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={touched.birthdayDate && !!errors.birthdayDate}
-                readOnly={true}
+                disabled
             />
             <Form.Control.Feedback type="invalid">{errors.birthdayDate}</Form.Control.Feedback>
         </Form.Group>
@@ -542,7 +640,7 @@ function Crud_empleado(){
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={touched.dni && !!errors.dni}
-                readOnly={true}
+                disabled
             />
             <Form.Control.Feedback type="invalid">{errors.dni}</Form.Control.Feedback>
         </Form.Group>
@@ -572,7 +670,6 @@ function Crud_empleado(){
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={touched.idcargo && !!errors.idcargo}
-                disabled
             >
             <option value="">Selecciona un cargo</option>
                 {Cargos.map(cargo => (
@@ -628,7 +725,7 @@ function Crud_empleado(){
             {({ values, errors, touched, handleSubmit, handleChange, handleBlur }) => (
     <Modal show={showModalGuardar} onHide={handleCerrarModalGuardar}>
         <Modal.Header closeButton>
-            <Modal.Title>Crear Producto</Modal.Title>
+            <Modal.Title>Crear Empleado</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <Form onSubmit={handleSubmit}>

@@ -8,25 +8,61 @@ import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import AppointmentService from '../services/AppointmentService';
 import PetService from '../services/PetService';
 import IncomeService from '../services/IncomeService';
+import SpecialtyService from '../services/SpecialtyService';
+import EmployeeService from '../services/EmployeeService';
 import Menu_recepcionista from '../components/Menu_recepcionista';
 import Swal from 'sweetalert2';
 
 
 function Crud_Citas() {
     const [appointments, setAppointments] = useState([]);
+    const [Citas, setCitas] = useState([]);
     const [error, setError] = useState(null);
     const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
     const [mostrarModalGuardar, setMostrarModalGuardar] = useState(false);
     const [datosFormularioEdicion, setDatosFormularioEdicion] = useState({ id: '', date: '', hour: '', petName: '', specialty: '', veterinarian: '' });
     const [mascotas, setMascotas] = useState([]);
     const [mascotasSelect, setMascotasSelect] = useState([]);
+    const [EspecialidadSelect, setEspecialidadSelect] = useState([]);
+    const [VeterinarioSelect, setVeterinarioSelect] = useState([]);
     const [especialidades, setEspecialidades] = useState([]);
+    const [terminoBusqueda, setTerminoBusqueda] = useState('');
     const [veterinarios, setVeterinarios] = useState([]);
+    const [dni, setDni] = useState('');
+    const [FilteredMascotasSelect, setFilteredMascotasSelect] = useState([]);
 
     useEffect(() => {
         fetchData();
         fetchMascotaSelect();
+        fetchCitas();
+        fetchEspecialidadSelect();
+        fetchVeterinarioSelect();
     }, []);
+
+    const fetchEspecialidadSelect = async () => {
+        try {
+            const response = await SpecialtyService.getAllSpecialtys();
+            setEspecialidadSelect(response.data.DATA);
+        } catch (error) {
+            console.log("Error al obtener las especialidades: ", error);
+        }
+    }
+
+    const fetchVeterinarioSelect = async () => {
+        try {
+            const response = await EmployeeService.getAllEmployees();
+            setVeterinarioSelect(response.data);
+        } catch (error) {
+            console.log("Error al obtener los empleados: ", error);
+        }
+    }
+
+    const VeterinariosFiltrados = VeterinarioSelect
+    .filter(veterinario => veterinario.idcargo.id === 1)
+    .map(veterinario => ({
+        id: veterinario.id,
+        name: veterinario.name
+    }));
 
     const fetchData = async () => {
         try {
@@ -48,10 +84,32 @@ function Crud_Citas() {
         }
     };
 
+    const fetchCitas = async () => {
+        try {
+            const response = await AppointmentService.getAllAppointments();
+            setCitas(response.data.DATA.reverse());
+        } catch (error) {
+            setError(error.message);
+        }
+    }
+
+    // Filtrar los ingresos según el ID del empleado y el término de búsqueda
+    const CitasFiltradas = Citas.filter(appointments => {
+        const termino = terminoBusqueda.toLowerCase();
+        return (
+            appointments.id?.toString().includes(termino) ||
+            appointments.date?.toLowerCase().includes(termino) ||
+            appointments.hour?.toLowerCase().includes(termino) ||
+            appointments.idmascota?.idcliente?.dni?.toLowerCase().includes(termino) ||
+            appointments.idmascota?.name?.toLowerCase().includes(termino) ||
+            appointments.idespecialidad?.name?.toString().toLowerCase().includes(termino) ||
+            appointments.idempleado?.name?.toLowerCase().includes(termino)
+        );
+    });
+
     const fetchMascotaSelect = async () => {
         try {
             const response = await PetService.getAllPets();
-            console.log("Mascotas del select: ", response)
             setMascotasSelect(response.data.data);
         } catch (error) {
             setError(error.message);
@@ -109,6 +167,11 @@ function Crud_Citas() {
         });
     };
 
+    // Función para manejar el cambio en el input de búsqueda
+    const manejarCambioBusqueda = (e) => {
+        setTerminoBusqueda(e.target.value);
+    };
+
     const eliminarCita = async (citaId) => {
         try {
              // Consultar todos los ingresos
@@ -124,6 +187,7 @@ function Crud_Citas() {
             // Eliminar la cita
             await AppointmentService.deleteAppointment(citaId);
             fetchData(); // Actualiza la tabla después de eliminar
+            fetchCitas();
             Swal.fire({
                 icon: 'success',
                 title: '¡Éxito!',
@@ -169,7 +233,7 @@ function Crud_Citas() {
                 return false;
             }
         }),
-        petName: Yup.string().required('Nombre de la mascota es requerido'),
+        idmascota: Yup.string().required('Nombre de la mascota es requerido'),
         specialty: Yup.string().required('Especialidad es requerida'),
         veterinarian: Yup.string().required('Veterinario es requerido')
     });
@@ -177,18 +241,16 @@ function Crud_Citas() {
     // Función para Guardar
     const handleGuardarCita = async (values, { setSubmitting }) => {
         try {
-            const idMascota = mascotas.find(mascota => mascota.name === values.petName)?.id;
             const idEspecialidad = especialidades.find(especialidad => especialidad.name === values.specialty)?.id;
             const idVeterinario = veterinarios.find(veterinario => veterinario.name === values.veterinarian)?.id;
 
             const response = await AppointmentService.createAppointment({
                 date: values.date,
                 hour: values.hour,
-                idmascota: { id: idMascota },
+                idmascota: { id: values.idmascota },
                 idespecialidad: { id: idEspecialidad },
                 idempleado: { id: idVeterinario }
             });
-            console.log('Respuesta de la API:', response.data);
 
             // Obtener todas las citas para encontrar la última creada
             const responseCita = await AppointmentService.getAllAppointments();
@@ -211,9 +273,8 @@ function Crud_Citas() {
                 }
             );
 
-            console.log("Datos de ingreso enviados:", ingresoResponse);
-
             fetchData(); // Actualiza la tabla
+            fetchCitas();
             cerrarModalGuardar(); // Cierra el modal
             setDatosFormularioEdicion({ id: '', date: '', hour: '', petName: '', specialty: '', veterinarian: '' });
             Swal.fire({
@@ -226,6 +287,12 @@ function Crud_Citas() {
         } finally {
             setSubmitting(false);
         }
+    };
+    const handleDniChange = (event) => {
+        const dni = event.target.value;
+        setDni(dni);
+        const filtered = mascotasSelect.filter(mascota => mascota.idcliente.dni === dni);
+        setFilteredMascotasSelect(filtered);
     };
 
     return (
@@ -245,7 +312,7 @@ function Crud_Citas() {
                                 </div>
                                 <br />
                                 <div className={StylesTabla.DivInpuctsearch}>
-                                    <input className={StylesTabla.Inpuctsearch} type="search" placeholder="Buscar" />
+                                    <input className={StylesTabla.Inpuctsearch} type="search" placeholder="Buscar" value={terminoBusqueda} onChange={manejarCambioBusqueda} />
                                     <i className="bi bi-search-heart" style={{ color: '#56208c', position: 'absolute', top: '10px', right: '1rem', fontSize: '1.2rem' }}></i>
                                 </div>
                             </section>
@@ -257,6 +324,7 @@ function Crud_Citas() {
                                         <th style={{ textAlign: "center" }}>Id</th>
                                         <th style={{ textAlign: "center" }}>Fecha cita</th>
                                         <th style={{ textAlign: "center" }}>Hora cita</th>
+                                        <th style={{ textAlign: "center" }}>N° cedula</th>
                                         <th style={{ textAlign: "center" }}>Nombre Mascota</th>
                                         <th style={{ textAlign: "center" }}>Especialidad</th>
                                         <th style={{ textAlign: "center" }}>Veterinario</th>
@@ -264,11 +332,12 @@ function Crud_Citas() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {appointments.map(appointment => (
+                                    {CitasFiltradas.map(appointment => (
                                         <tr key={appointment.id}>
                                             <td style={{ textAlign: "center" }}>{appointment.id}</td>
                                             <td style={{ textAlign: "center" }}>{appointment.date}</td>
                                             <td style={{ textAlign: "center" }}>{appointment.hour}</td>
+                                            <td style={{ textAlign: "center" }}>{appointment.idmascota.idcliente.dni}</td>
                                             <td style={{ textAlign: "center" }}>{appointment.idmascota.name}</td>
                                             <td style={{ textAlign: "center" }}>{appointment.idespecialidad.name}</td>
                                             <td style={{ textAlign: "center" }}>{appointment.idempleado.name}</td>
@@ -305,21 +374,32 @@ function Crud_Citas() {
                                                 <Field type="time" name="hour" className="form-control" />
                                                 <ErrorMessage name="hour" component="div" className="text-danger" />
                                             </Form.Group>
+                                            <Form.Group controlId="formBasiccedula">
+                                                <Form.Label>N° Cedula cliente</Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    name="number_microchip"
+                                                    value={dni}
+                                                    onChange={handleDniChange}                                                   
+                                                />
+
+                                            </Form.Group>
                                             <Form.Group controlId="formBasicPetName">
                                                 <Form.Label>Nombre Mascota</Form.Label>
-                                                <Field as="select" name="petName" className="form-control">
+                                                <Field as="select" name="idmascota" className="form-control">
                                                     <option value="">Selecciona una mascota</option>
-                                                    {mascotasSelect.map(mascota => (
+                                                    {FilteredMascotasSelect.map(mascota => (
                                                         <option key={mascota.id} value={mascota.id}>{mascota.name}</option>
                                                     ))}
                                                 </Field>
-                                                <ErrorMessage name="petName" component="div" className="text-danger" />
+                                                <ErrorMessage name="idmascota" component="div" className="text-danger" />
                                             </Form.Group>
+                                            {/* <ErrorMessage name="petName" component="div" className="text-danger" /> */}
                                             <Form.Group controlId="formBasicSpecialty">
                                                 <Form.Label>Especialidad</Form.Label>
                                                 <Field as="select" name="specialty" className="form-control">
                                                     <option value="">Selecciona una especialidad</option>
-                                                    {especialidades.map((especialidad, index) => (
+                                                    {EspecialidadSelect.map((especialidad, index) => (
                                                         <option key={index} value={especialidad.name}>{especialidad.name}</option>
                                                     ))}
                                                 </Field>
@@ -329,7 +409,7 @@ function Crud_Citas() {
                                                 <Form.Label>Veterinario</Form.Label>
                                                 <Field as="select" name="veterinarian" className="form-control">
                                                     <option value="">Selecciona un veterinario</option>
-                                                    {veterinarios.map((veterinario, index) => (
+                                                    {VeterinariosFiltrados.map((veterinario, index) => (
                                                         <option key={index} value={veterinario.name}>{veterinario.name}</option>
                                                     ))}
                                                 </Field>

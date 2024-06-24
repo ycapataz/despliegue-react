@@ -10,6 +10,7 @@ import ProductService from '../services/ProductService';
 import SelectedRegistroClinicoContext from '../context/SelectedRegistroContext';
 import MenuVeterinario from '../components/Menu_veterinario';
 import { Formik, Field, ErrorMessage } from 'formik';
+import ReporteFormulaExcel from '../components/ReporteExecelFormu';
 
 function CrudFormulaMedica() {
     const location = useLocation();
@@ -179,10 +180,13 @@ function CrudFormulaMedica() {
     const validateForm = (values) => {
         const errors = {};
         // Validar dosis
+        // Validar dosis
         if (!values.dose) {
             errors.dose = 'La dosis es requerida.';
-        } else if (!/^[1-9][0-9]*$/.test(values.dose)) {
-            errors.dose = 'Por favor ingresar una dosis válida.';
+        } else if (!/^\d+$/.test(values.dose)) {
+            errors.dose = 'Por favor ingrese una dosis válida. Solo se permiten números.';
+        } else if (Number(values.dose) < 1 || Number(values.dose) > 100) {
+            errors.dose = 'La dosis debe estar entre 1 y 100.';
         }
         // Validar duración
         if (!values.duration) {
@@ -214,6 +218,8 @@ function CrudFormulaMedica() {
     const FormulaMFiltrada = FormulasMedicas.filter(record => {
         return (
             record.id.toString().includes(terminoBusqueda.toLowerCase())  ||
+            record.idregistroclinico.idmascota.name.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+            record.idregistroclinico.idmascota.idcliente.dni.toString().includes(terminoBusqueda.toLowerCase()) ||
             (typeof record.dose === 'string' && record.dose.toLowerCase().includes(terminoBusqueda.toLowerCase())) ||
             record.duration.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
             record.amount.toString().includes(terminoBusqueda.toLowerCase()) ||
@@ -222,6 +228,15 @@ function CrudFormulaMedica() {
             record.idproducto?.name?.toLowerCase().includes(terminoBusqueda.toLowerCase())
         );
     });
+
+    const [dni, setDni] = useState('');
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const openModal = () => {
+        setModalIsOpen(true);
+    };
+    const closeModal = () => {
+        setModalIsOpen(false);
+    };
 
     return (
         <>
@@ -237,7 +252,9 @@ function CrudFormulaMedica() {
                 <section className="table__header">
                     <h1 className={StylesTabla.NombreTable}>Formula Medica</h1>
                     <div>
-                        <button className={StylesTabla.buttonHeader} onClick={handleShowCreateModal}>Crear Formula</button>
+                        <button className={StylesTabla.buttonHeader} onClick={handleShowCreateModal} style={{ marginRight: '10px' }} >Crear Formula</button>
+                        <button className={StylesTabla.buttonHeader} onClick={openModal} >Reporte</button>
+                        <ReporteFormulaExcel dni={dni} modalIsOpen={modalIsOpen} closeModal={closeModal} />
                     </div>
                     <br/>
                     <div className={StylesTabla.DivInpuctsearch}>
@@ -251,19 +268,23 @@ function CrudFormulaMedica() {
                     <thead className={StylesTabla.tablethead} >
                         <tr>
                             <th style={{ textAlign: "center" }}>ID</th>
+                            <th style={{ textAlign: "center" }}>Mascota</th>
+                            <th style={{ textAlign: "center" }}>CC Propietario</th>
                             <th style={{ textAlign: "center" }}>Dosis</th>
                             <th style={{ textAlign: "center" }}>Duracion</th>
                             <th style={{ textAlign: "center" }}>Cantidad</th>
                             <th style={{ textAlign: "center" }}>Notas</th>                          
                             <th style={{ textAlign: "center" }}>Registroclinico</th>
                             <th style={{ textAlign: "center" }}>Producto</th>
-                            <th style={{ textAlign: "center" }}>Acciones</th>
+                            <th style={{ textAlign: "center" }}>Editar</th>
                         </tr>
                     </thead>
                     <tbody>
                         {FormulaMFiltrada.map(record => (
                                 <tr key={record.id}>
                                 <td style={{ textAlign: "center" }}>{record.id}</td>
+                                <td>{record.idregistroclinico.idmascota.name}</td>
+                                <td>{record.idregistroclinico.idmascota.idcliente.dni}</td>
                                 <td style={{ textAlign: "center" }}>{record.dose}</td>
                                 <td style={{ textAlign: "center" }}>{record.duration}</td>
                                 <td style={{ textAlign: "center" }}>{record.amount}</td>

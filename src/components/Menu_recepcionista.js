@@ -7,8 +7,7 @@ import UserContext from '../context/UserContext';
 
 function Menu_recepcionista() {
     const { user } = useContext(UserContext);
-    const nombreUsuario = user ? user.name : 'Nombre no disponible';
-    console.log('Nombre recibido en Menu_recepcionista:',  nombreUsuario);
+    const nombreUsuario = user ? `${user.name} ${user.lastName}` : 'Nombre no disponible';
 return (
     <>
     {/*Menu superior*/}

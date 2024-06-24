@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import Navbar from "../components/Navbar";
 import StylesTabla from '../assets/css/avg_encabezado.module.scss';
 import CustomerService from '../services/CustomerService';
+import CityService from '../services/CityService';
 import Menu_recepcionista from '../components/Menu_recepcionista';
 import Swal from 'sweetalert2';
 
@@ -13,15 +14,15 @@ const validationSchema = Yup.object().shape({
     name: Yup.string()
         .matches(/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]+(?:\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]+){0,2}$/, 'Esto no es un nombre.')
         .min(3, 'Debe tener al menos 3 caracteres')
-        .max(15, 'Exceso de caracteres, esto no parece un nombre.')
+        .max(15, 'Exceso de caracteres máximo 15.')
         .required('Campo requerido'),
     lastName: Yup.string()
         .matches(/^[a-zA-ZñÑáÁéÉíÍóÓúÚ]+(?:\s[a-zA-ZñÑáÁéÉíÍóÓúÚ]+){0,3}$/, 'Esto no es un apellido.')
         .min(3, 'Debe tener al menos 3 caracteres')
-        .max(20, 'Exceso de caracteres, esto no parece un apellido.')
+        .max(20, 'Exceso de caracteres máximo 20.')
         .required('Campo requerido'),
     dni: Yup.string()
-        .matches(/^((\d{8})|(\d{10})|(\d{11})|(\d{6}))?$/, "Ingresar una cedula valida")
+        .matches(/^((\d{8})|(\d{10})|(\d{11})|(\d{6}))?$/, "Ingresar un N° cedula valida")
         .required('Requerido'),
     phone: Yup.string()
         .matches(/^(310|311|312|313|314|321|320|322|323|315|316|317|318|319|350|351|300|301|302|324|304)[0-9]{7}$/, "Ingresar un teléfono válido.")
@@ -45,9 +46,11 @@ function Crud_Clientes() {
     const [clienteSeleccionada, setClienteSeleccionada] = useState(null);
     const [ciudades, setCiudades] = useState([]);
     const [terminoBusqueda, setTerminoBusqueda] = useState('');
+    const [CitySelect, setCitySelect] = useState([]);
 
     useEffect(() => {
         fetchData();
+        fetchCity();
     }, []);
 
     const fetchData = async () => {
@@ -61,6 +64,15 @@ function Crud_Clientes() {
             setError(error.message);
         }
     };
+
+    const fetchCity = async () => {
+        try{
+            const response = await CityService.getAllCitys();
+            setCitySelect(response.data);
+        }catch (error) {
+            console.log("Error al obtener las ciudades: ", error);
+        }
+    }
 
     const abrirModalGuardar = () => {
         setDatosFormularioEdicion({ id: '', name: '', lastName: '', dni: '', phone: '', mail: '', address: '', city: '' });
@@ -122,13 +134,13 @@ function Crud_Clientes() {
             Swal.fire({
                 icon: 'success',
                 title: '¡Éxito!',
-                text: 'Cliente guardado correctamente.',
+                text: 'Propietario guardado correctamente.',
             });
             fetchData();
             cerrarModalGuardar();
             resetForm();
         } catch (error) {
-            console.error('Error al guardar el cliente:', error);
+            console.error('Error al guardar el Propietario:', error);
         } finally {
             setSubmitting(false);
         }
@@ -148,15 +160,15 @@ function Crud_Clientes() {
                     id: idCiudad
                 },
             });
+            fetchData();
+            cerrarModalEdicion();
             Swal.fire({
                 icon: 'success',
                 title: '¡Éxito!',
                 text: 'Los cambios se guardaron correctamente.',
             });
-            fetchData();
-            cerrarModalEdicion();
         } catch (error) {
-            console.error('Error al actualizar el cliente:', error);
+            console.error('Error al actualizar el Propietario:', error);
         } finally {
             setSubmitting(false);
         }
@@ -193,9 +205,9 @@ function Crud_Clientes() {
                     <div className={StylesTabla.containerTable}>
                         <div className={StylesTabla.TableHeader}>
                             <section className="table__header">
-                                <h1 className={StylesTabla.NombreTable}>Tabla Cliente</h1>
+                                <h1 className={StylesTabla.NombreTable}>Tabla Propietario</h1>
                                 <div>
-                                    <button className={StylesTabla.buttonHeader} onClick={abrirModalGuardar}>Crear cliente</button>
+                                    <button className={StylesTabla.buttonHeader} onClick={abrirModalGuardar}>Crear Propietario</button>
                                 </div>
                                 <br />
                                 <div className={StylesTabla.DivInpuctsearch}>
@@ -243,7 +255,7 @@ function Crud_Clientes() {
                         {/* Modal para EDITAR */}
                         <Modal show={mostrarModalEdicion} onHide={cerrarModalEdicion}>
                             <Modal.Header closeButton>
-                                <Modal.Title>Editar Cliente</Modal.Title>
+                                <Modal.Title>Editar Propietario</Modal.Title>
                             </Modal.Header>
                             <Formik
                                 initialValues={datosFormularioEdicion}
@@ -288,7 +300,7 @@ function Crud_Clientes() {
                                                 <Form.Label>Ciudad</Form.Label>
                                                 <Field as="select" className="form-control" name="city">
                                                     <option value="">Seleccionar ciudad</option>
-                                                    {ciudades.map(ciudad => (
+                                                    {CitySelect.map(ciudad => (
                                                         <option key={ciudad.id} value={ciudad.name}>
                                                             {ciudad.name}
                                                         </option>
@@ -313,7 +325,7 @@ function Crud_Clientes() {
                         {/* Modal para GUARDAR */}
                         <Modal show={mostrarModalGuardar} onHide={cerrarModalGuardar}>
                             <Modal.Header closeButton>
-                                <Modal.Title>Guardar Cliente</Modal.Title>
+                                <Modal.Title>Guardar Propietario</Modal.Title>
                             </Modal.Header>
                             <Formik
                                 initialValues={{
@@ -365,7 +377,7 @@ function Crud_Clientes() {
                                                 <Form.Label>Ciudad</Form.Label>
                                                 <Field as="select" className="form-control" name="city">
                                                     <option value="">Seleccionar ciudad</option>
-                                                    {ciudades.map(ciudad => (
+                                                    {CitySelect.map(ciudad => (
                                                         <option key={ciudad.id} value={ciudad.name}>
                                                             {ciudad.name}
                                                         </option>
@@ -379,7 +391,7 @@ function Crud_Clientes() {
                                                 Cancelar
                                             </Button>
                                             <Button variant="primary" type="submit" disabled={isSubmitting} style={{ background: '#56208c', borderColor: 'transparent' }} >
-                                                Guardar
+                                                Guardar Propietario
                                             </Button>
                                         </Modal.Footer>
                                     </FormikForm>
